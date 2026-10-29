@@ -5,6 +5,9 @@
 <script src="config.js"></script>
 <title>Empire Events Board</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preload" href="fonts/lemonmilk-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/spitz-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/spitz-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Forum&family=Inter+Tight:wght@400;500;600&display=swap">
@@ -232,6 +235,7 @@ function fit(slide) {
   if (img?.complete) sizeArt(img);
   const h1 = slide.querySelector("h1"), top = slide.querySelector(".top"), blurb = slide.querySelector(".blurb");
   if (narrow.matches) { h1.style.fontSize = ""; return; } // phones scroll; the CSS sizes are enough
+  blurb?.style.setProperty("--clamp", 4); // start from the full blurb on every (re)fit
   const u = Math.min(innerHeight / 100, innerWidth * 0.005625);
   const fits = () => top.scrollHeight <= top.clientHeight + 1;
   for (let size = 7; size >= 3.6; size -= 0.25) {
@@ -354,7 +358,10 @@ preload();
 // Measure titles with the real fonts, not the fallbacks.
 (document.fonts?.ready ?? Promise.resolve()).then(() => { show(); refresh(); });
 setInterval(refresh, REFRESH_MS);
-addEventListener("resize", () => { const s = stage.querySelector(".slide.on"); if (s) fit(s); });
+// Refit when the window changes or a web font finishes loading (its metrics differ from the fallback's).
+const refit = () => stage.querySelectorAll(".slide").forEach(fit);
+addEventListener("resize", refit);
+document.fonts?.addEventListener("loadingdone", refit);
 
 document.addEventListener("keydown", (ev) => {
   if (ev.key === "ArrowRight" || ev.key === " ") { ev.preventDefault(); show(1); }
