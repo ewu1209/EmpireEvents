@@ -338,12 +338,18 @@ function show(step = 1) {
   }
   i = (i + step + list.length) % list.length;
   const e = list[i];
-  const old = stage.querySelector(".slide.on");
   stage.insertAdjacentHTML("beforeend", slideHTML(e));
   const el = stage.lastElementChild;
   fit(el);
-  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("on")));
-  if (old) { old.classList.remove("on"); setTimeout(() => old.remove(), 900); }
+  // Retire every other slide: the newest one fades out, anything older goes now. Don't rely on
+  // requestAnimationFrame here: hidden tabs and sleeping TVs pause it, and slides would pile up.
+  const others = [...stage.querySelectorAll(".slide")].filter((s) => s !== el);
+  others.forEach((s, j) => {
+    s.classList.remove("on");
+    if (j < others.length - 1) s.remove(); else setTimeout(() => s.remove(), 900);
+  });
+  void el.offsetWidth; // commit the hidden state so the fade-in still animates
+  el.classList.add("on");
   stage.querySelectorAll(".empty").forEach((n) => n.remove());
   document.getElementById("count").textContent = `${i + 1} of ${list.length}`;
   renderAgenda(list, i, step);
