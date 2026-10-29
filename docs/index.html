@@ -9,15 +9,23 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Forum&family=Inter+Tight:wght@400;500;600&display=swap">
 <style>
-/* Empire Scottsdale brand (empirescottsdale.com): #131313 ground, #F2B000 gold, white type,
-   Orpheus Pro headings (Forum is the closest free stand-in) and Inter Tight body, 10–12px radii.
+/* Empire brand fonts: Lemon Milk (display) and Linotype Spitz (text). The files live in fonts/, which is
+   git-ignored until web licences are confirmed; without them the page falls back to Forum / Inter Tight. */
+@font-face{font-family:"Lemon Milk";src:url(fonts/lemonmilk-300.woff2) format("woff2");font-weight:300;font-display:swap}
+@font-face{font-family:"Lemon Milk";src:url(fonts/lemonmilk-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Lemon Milk";src:url(fonts/lemonmilk-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Lemon Milk";src:url(fonts/lemonmilk-700.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Linotype Spitz";src:url(fonts/spitz-300.woff2) format("woff2");font-weight:300;font-display:swap}
+@font-face{font-family:"Linotype Spitz";src:url(fonts/spitz-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Linotype Spitz";src:url(fonts/spitz-700.woff2) format("woff2");font-weight:700;font-display:swap}
+/* Empire Scottsdale brand (empirescottsdale.com): #131313 ground, #F2B000 gold, white type, 10–12px radii.
    Layout for a 16:9 lobby TV: flyer panel left, details right, RSVP card bottom-aligned with the flyer.
    --u is 1% of the screen height (capped by width), so everything scales from 720p to 4K. */
 :root{
   --bg:#131313; --panel:#1c1c1c; --line:#2c2c2c;
   --gold:#f2b000; --white:#fff; --mute:rgba(255,255,255,.68); --faint:rgba(255,255,255,.45);
-  --display:"orpheus-pro","Forum",Georgia,serif;
-  --body:"Inter Tight","Helvetica Neue",Arial,sans-serif;
+  --display:"Lemon Milk","Forum",Georgia,serif;
+  --body:"Linotype Spitz","Inter Tight","Helvetica Neue",Arial,sans-serif;
   --u:min(1vh,.5625vw);
   --radius:calc(var(--u)*1.2);
   --slide-ms:15000;
@@ -58,7 +66,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .top>*{flex-shrink:0} /* overflow must show up on .top, where fit() measures it, not squash the items */
 .date{color:var(--gold);font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:calc(var(--u)*2.8)}
 .time{font-weight:500;font-size:calc(var(--u)*3.6);margin-top:calc(var(--u)*-1);font-variant-numeric:tabular-nums}
-h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(var(--u)*.2);line-height:1.04;text-wrap:balance;font-size:calc(var(--u)*8)}
+h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(var(--u)*.2);line-height:1.04;text-wrap:balance;font-size:calc(var(--u)*7)}
 .where{display:flex;align-items:center;gap:.5em;font-size:calc(var(--u)*3);font-weight:500}
 .where svg{width:.95em;height:.95em;flex:none;fill:var(--gold)}
 .blurb{margin:0;color:var(--mute);font-size:calc(var(--u)*2.7);line-height:1.45;max-width:34em;
@@ -68,7 +76,7 @@ h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(va
 .rsvp{margin-top:auto;padding-top:calc(var(--u)*3);display:flex;align-items:center;gap:calc(var(--u)*3)}
 .qr{flex:none;width:calc(var(--u)*20);aspect-ratio:1;background:var(--white);border-radius:var(--radius);padding:calc(var(--u)*1.5)}
 .qr svg{display:block;width:100%;height:100%;fill:#131313}
-.rsvp .cta{font-family:var(--display);font-size:calc(var(--u)*4.4);line-height:1.05}
+.rsvp .cta{font-family:var(--display);font-size:calc(var(--u)*3.4);line-height:1.05}
 .rsvp .url{color:var(--faint);font-size:calc(var(--u)*2.3);margin-top:calc(var(--u)*1);overflow-wrap:anywhere}
 .rsvp .pill{display:inline-block;margin-bottom:calc(var(--u)*1.4);background:var(--gold);color:#131313;font-weight:600;font-size:calc(var(--u)*2);
   letter-spacing:.14em;text-transform:uppercase;padding:.55em 1em;border-radius:calc(var(--u)*.8)}
@@ -79,10 +87,10 @@ h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(va
    and wraps (it is rendered twice so the loop is seamless). The fade at the bottom says "more below". */
 .agenda{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--line);padding-left:calc(var(--u)*4)}
 .ag-head{display:grid;gap:calc(var(--u)*1.1);padding-bottom:calc(var(--u)*2);border-bottom:1px solid var(--line)}
-.ag-head h2{margin:0;font-family:var(--display);font-weight:400;font-size:calc(var(--u)*4.2);line-height:1;white-space:nowrap}
+.ag-head h2{margin:0;font-family:var(--display);font-weight:400;font-size:calc(var(--u)*3.3);line-height:1;white-space:nowrap}
 .ag-count{color:var(--gold);font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:calc(var(--u)*1.75);white-space:nowrap}
 .ag-window{position:relative;flex:1;min-height:0;overflow:hidden;margin-top:calc(var(--u)*1.6);
-  -webkit-mask-image:linear-gradient(#000 78%,transparent);mask-image:linear-gradient(#000 78%,transparent)}
+  -webkit-mask-image:linear-gradient(transparent,#000 16%,#000 76%,transparent);mask-image:linear-gradient(transparent,#000 16%,#000 76%,transparent)}
 .ag-list{list-style:none;margin:0;padding:0;transition:transform .9s cubic-bezier(.4,0,.2,1)}
 .ag-list.snap{transition:none}
 .ag-item{display:grid;grid-template-columns:calc(var(--u)*7.5) minmax(0,1fr);align-items:center;gap:calc(var(--u)*2.2);
@@ -91,11 +99,11 @@ h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(va
 .ag-item.on{background:var(--panel);border-left-color:var(--gold)}
 .ag-date{display:grid;justify-items:center;line-height:1;font-variant-numeric:tabular-nums}
 .ag-date .dw{color:var(--gold);font-weight:600;letter-spacing:.14em;font-size:calc(var(--u)*1.55)}
-.ag-date .dn{font-family:var(--display);font-size:calc(var(--u)*4.6);margin:calc(var(--u)*.35) 0 calc(var(--u)*.25)}
+.ag-date .dn{font-family:var(--display);font-size:calc(var(--u)*4);margin:calc(var(--u)*.35) 0 calc(var(--u)*.25)}
 .ag-date .dm{color:var(--mute);font-weight:600;letter-spacing:.14em;font-size:calc(var(--u)*1.45)}
 /* Every row is as tall as a two-line title (text centred inside), so the rhythm is even and scroll offsets never shift. */
-.ag-item{min-height:calc(var(--u)*12.4)}
-.ag-title{font-family:var(--display);font-size:calc(var(--u)*2.85);line-height:1.12;color:rgba(255,255,255,.88);
+.ag-item{min-height:calc(var(--u)*11)}
+.ag-title{font-family:var(--display);font-size:calc(var(--u)*2.2);line-height:1.18;letter-spacing:.01em;color:rgba(255,255,255,.88);
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .ag-item.on .ag-title{color:var(--white)}
 .ag-sub{color:var(--faint);font-size:calc(var(--u)*1.85);margin-top:calc(var(--u)*.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -112,7 +120,7 @@ footer{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:calc(v
 @keyframes fill{to{transform:scaleX(1)}}
 
 .empty{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:calc(var(--u)*2)}
-.empty h1{font-size:calc(var(--u)*7)}
+.empty h1{font-size:calc(var(--u)*6)}
 .empty p{color:var(--mute);margin:0;font-size:calc(var(--u)*2.6)}
 
 /* Phones and narrow windows: stack and scroll. */
@@ -226,7 +234,7 @@ function fit(slide) {
   if (narrow.matches) { h1.style.fontSize = ""; return; } // phones scroll; the CSS sizes are enough
   const u = Math.min(innerHeight / 100, innerWidth * 0.005625);
   const fits = () => top.scrollHeight <= top.clientHeight + 1;
-  for (let size = 8; size >= 4.6; size -= 0.25) {
+  for (let size = 7; size >= 3.6; size -= 0.25) {
     h1.style.fontSize = size * u + "px";
     if (h1.offsetHeight <= size * u * 1.04 * 3 + 2 && fits()) return;
   }
@@ -237,9 +245,12 @@ function fit(slide) {
   }
 }
 
-// Agenda: rebuilt only when the event list changes, then scrolled so the featured event is the top row.
+// Agenda: rebuilt only when the event list changes. The featured event sits one row down, under the
+// previous event (faded by the mask), so the top row never reads as "next". Rows are laid out as
+// [last event, loop divider] + events + [loop divider, events again] so the loop is seamless both ways.
 const agendaEl = document.getElementById("agenda"), fDw = fmt({ weekday: "short" }), fMs = fmt({ month: "short" });
-let agendaKey = "", agendaAt = 0;
+let agendaKey = "", agendaAt = -1, agendaCur = -1;
+const LOOP = `<li class="ag-loop dup" aria-hidden="true">Back to the first event</li>`;
 function agendaRow(e, k, dup) {
   const s = new Date(e.start);
   return `<li class="ag-item${dup ? " dup" : ""}" data-k="${k}" ${dup ? 'aria-hidden="true"' : ""}>
@@ -251,31 +262,37 @@ function renderAgenda(list, k, step) {
   const key = list.map((e) => e.id + e.start).join("|");
   if (key !== agendaKey) {
     agendaKey = key;
-    agendaEl.innerHTML = list.map((e, j) => agendaRow(e, j)).join("") +
-      (list.length > 1 ? `<li class="ag-loop dup" aria-hidden="true">Back to the first event</li>` + list.map((e, j) => agendaRow(e, j, true)).join("") : "");
+    const n = list.length, loop = n > 1;
+    agendaEl.innerHTML = (loop ? agendaRow(list[n - 1], n - 1, true) + LOOP : "") +
+      list.map((e, j) => agendaRow(e, j)).join("") +
+      (loop ? LOOP + list.map((e, j) => agendaRow(e, j, true)).join("") : "");
     agendaAt = -1;
-    const last = new Date(list[list.length - 1].start);
-    document.getElementById("ag-count").textContent = `${list.length} event${list.length > 1 ? "s" : ""} · through ${fShort.format(last)}`;
+    const last = new Date(list[n - 1].start);
+    document.getElementById("ag-count").textContent = `${n} event${n > 1 ? "s" : ""} · through ${fShort.format(last)}`;
   }
   agendaEl.querySelectorAll(".ag-item").forEach((li) => li.classList.toggle("on", +li.dataset.k === k));
-  const n = list.length;
+  const n = list.length, pre = n > 1 ? 2 : 0; // child index of event k is pre + k; its second copy is pre + n + 1 + k
   if (agendaAt === n - 1 && k === 0 && step === 1) {
-    // Wrap forwards: glide past the divider onto the duplicate first row, then jump back to the real one.
-    agendaMove(n + 1, true);
-    setTimeout(() => agendaMove(0, false), 950);
+    // Wrap forwards: glide onto the second copy of the first event, then jump to the real one (same view).
+    agendaMove(pre + n + 1, true);
+    setTimeout(() => agendaMove(pre, false), 950);
   } else {
-    agendaMove(k, agendaAt >= 0 && Math.abs(k - agendaAt) === 1);
+    agendaMove(pre + k, agendaAt >= 0 && Math.abs(k - agendaAt) === 1);
   }
   agendaAt = k;
 }
+// Scroll so the event row before child `idx` is at the top (skipping a loop divider), i.e. the featured row is one down.
 function agendaMove(idx, animate) {
   const row = agendaEl.children[idx];
   if (!row) return;
+  agendaCur = idx;
+  let prev = row.previousElementSibling;
+  while (prev && prev.classList.contains("ag-loop")) prev = prev.previousElementSibling;
   agendaEl.classList.toggle("snap", !animate);
-  agendaEl.style.transform = `translateY(${-row.offsetTop}px)`;
+  agendaEl.style.transform = `translateY(${-(prev ? prev.offsetTop : 0)}px)`;
 }
 // Late font loads or a resize change row heights: re-align on the featured row without animating.
-new ResizeObserver(() => { if (agendaAt >= 0) agendaMove(agendaAt, false); }).observe(agendaEl);
+new ResizeObserver(() => { if (agendaCur >= 0) agendaMove(agendaCur, false); }).observe(agendaEl);
 
 function preload() { EVENTS.forEach((e) => { if (e.image) new Image().src = e.image; }); }
 
