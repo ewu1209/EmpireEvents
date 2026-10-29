@@ -33,11 +33,11 @@ body{background:var(--bg);color:var(--white);font-family:var(--body);overflow:hi
 header{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .logo{height:calc(var(--u)*5.4);width:auto;display:block}
 .meta{display:flex;align-items:center;gap:calc(var(--u)*2.4);font-size:calc(var(--u)*2.1);color:var(--mute);font-variant-numeric:tabular-nums}
-.meta .label{color:var(--gold);font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:.82em}
-.meta .sep{width:1px;height:1.2em;background:var(--line)}
 
+/* Featured event on the left, the agenda of everything coming up on the right. */
+.main{display:grid;grid-template-columns:minmax(0,1fr) calc(var(--u)*46);gap:calc(var(--u)*4.5);min-height:0}
 .stage{position:relative;min-height:0}
-.slide{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,52fr) minmax(0,48fr);gap:calc(var(--u)*6);
+.slide{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:calc(var(--u)*4.5);
   opacity:0;transition:opacity .8s ease;pointer-events:none}
 .slide.on{opacity:1;pointer-events:auto}
 
@@ -58,7 +58,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .top>*{flex-shrink:0} /* overflow must show up on .top, where fit() measures it, not squash the items */
 .date{color:var(--gold);font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:calc(var(--u)*2.8)}
 .time{font-weight:500;font-size:calc(var(--u)*3.6);margin-top:calc(var(--u)*-1);font-variant-numeric:tabular-nums}
-h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(var(--u)*.2);line-height:1.04;text-wrap:balance;font-size:calc(var(--u)*9)}
+h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(var(--u)*.2);line-height:1.04;text-wrap:balance;font-size:calc(var(--u)*8)}
 .where{display:flex;align-items:center;gap:.5em;font-size:calc(var(--u)*3);font-weight:500}
 .where svg{width:.95em;height:.95em;flex:none;fill:var(--gold)}
 .blurb{margin:0;color:var(--mute);font-size:calc(var(--u)*2.7);line-height:1.45;max-width:34em;
@@ -66,24 +66,50 @@ h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(va
 
 /* RSVP card sits on the flyer's bottom edge. */
 .rsvp{margin-top:auto;padding-top:calc(var(--u)*3);display:flex;align-items:center;gap:calc(var(--u)*3)}
-.qr{flex:none;width:calc(var(--u)*22);aspect-ratio:1;background:var(--white);border-radius:var(--radius);padding:calc(var(--u)*1.6)}
+.qr{flex:none;width:calc(var(--u)*20);aspect-ratio:1;background:var(--white);border-radius:var(--radius);padding:calc(var(--u)*1.5)}
 .qr svg{display:block;width:100%;height:100%;fill:#131313}
-.rsvp .cta{font-family:var(--display);font-size:calc(var(--u)*5.2);line-height:1.05}
+.rsvp .cta{font-family:var(--display);font-size:calc(var(--u)*4.4);line-height:1.05}
 .rsvp .url{color:var(--faint);font-size:calc(var(--u)*2.3);margin-top:calc(var(--u)*1);overflow-wrap:anywhere}
 .rsvp .pill{display:inline-block;margin-bottom:calc(var(--u)*1.4);background:var(--gold);color:#131313;font-weight:600;font-size:calc(var(--u)*2);
   letter-spacing:.14em;text-transform:uppercase;padding:.55em 1em;border-radius:calc(var(--u)*.8)}
 .rsvp.walkin .cta{color:var(--white)}
 .rsvp.walkin .url{color:var(--mute)}
 
-footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:calc(var(--u)*2.6);color:var(--faint);
+/* Agenda: every upcoming event, the featured one highlighted; the list glides up a row per slide
+   and wraps (it is rendered twice so the loop is seamless). The fade at the bottom says "more below". */
+.agenda{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--line);padding-left:calc(var(--u)*4)}
+.ag-head{display:grid;gap:calc(var(--u)*1.1);padding-bottom:calc(var(--u)*2);border-bottom:1px solid var(--line)}
+.ag-head h2{margin:0;font-family:var(--display);font-weight:400;font-size:calc(var(--u)*4.2);line-height:1;white-space:nowrap}
+.ag-count{color:var(--gold);font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:calc(var(--u)*1.75);white-space:nowrap}
+.ag-window{position:relative;flex:1;min-height:0;overflow:hidden;margin-top:calc(var(--u)*1.6);
+  -webkit-mask-image:linear-gradient(#000 78%,transparent);mask-image:linear-gradient(#000 78%,transparent)}
+.ag-list{list-style:none;margin:0;padding:0;transition:transform .9s cubic-bezier(.4,0,.2,1)}
+.ag-list.snap{transition:none}
+.ag-item{display:grid;grid-template-columns:calc(var(--u)*7.5) minmax(0,1fr);align-items:center;gap:calc(var(--u)*2.2);
+  padding:calc(var(--u)*1.5) calc(var(--u)*1.8);margin-bottom:calc(var(--u)*.8);border-radius:var(--radius);
+  border-left:calc(var(--u)*.45) solid transparent;transition:background .6s,border-color .6s}
+.ag-item.on{background:var(--panel);border-left-color:var(--gold)}
+.ag-date{display:grid;justify-items:center;line-height:1;font-variant-numeric:tabular-nums}
+.ag-date .dw{color:var(--gold);font-weight:600;letter-spacing:.14em;font-size:calc(var(--u)*1.55)}
+.ag-date .dn{font-family:var(--display);font-size:calc(var(--u)*4.6);margin:calc(var(--u)*.35) 0 calc(var(--u)*.25)}
+.ag-date .dm{color:var(--mute);font-weight:600;letter-spacing:.14em;font-size:calc(var(--u)*1.45)}
+/* Every row is as tall as a two-line title (text centred inside), so the rhythm is even and scroll offsets never shift. */
+.ag-item{min-height:calc(var(--u)*12.4)}
+.ag-title{font-family:var(--display);font-size:calc(var(--u)*2.85);line-height:1.12;color:rgba(255,255,255,.88);
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.ag-item.on .ag-title{color:var(--white)}
+.ag-sub{color:var(--faint);font-size:calc(var(--u)*1.85);margin-top:calc(var(--u)*.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Where the loop starts over, so Dec 31 → Oct 31 doesn't read as a date mistake. */
+.ag-loop{display:flex;align-items:center;gap:calc(var(--u)*1.4);margin:calc(var(--u)*1.4) 0 calc(var(--u)*2.2);color:var(--gold);
+  font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:calc(var(--u)*1.45)}
+.ag-loop::before,.ag-loop::after{content:"";flex:1;height:1px;background:var(--line)}
+
+footer{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:calc(var(--u)*2.6);color:var(--faint);
   font-size:calc(var(--u)*1.9);font-variant-numeric:tabular-nums}
 .rail{height:calc(var(--u)*.35);min-height:2px;background:var(--line);position:relative;overflow:hidden;border-radius:9px}
 .rail i{position:absolute;inset:0;background:var(--gold);transform-origin:left;transform:scaleX(0)}
 .rail i.run{animation:fill linear forwards;animation-duration:calc(var(--slide-ms) * 1ms)}
 @keyframes fill{to{transform:scaleX(1)}}
-.next{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
-.next b{color:var(--white);font-weight:500}
-.next em{color:var(--gold);font-style:normal;font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:.85em;margin-right:.6em}
 
 .empty{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:calc(var(--u)*2)}
 .empty h1{font-size:calc(var(--u)*7)}
@@ -94,15 +120,20 @@ footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:c
   :root{--u:1.6vw}
   body{overflow:auto}
   .screen{height:auto;min-height:100%;padding:20px 16px}
+  .main{grid-template-columns:1fr;gap:28px}
   .stage{min-height:auto}
+  .agenda{border-left:0;padding-left:0}
+  .ag-window{-webkit-mask-image:none;mask-image:none}
+  .ag-list{transform:none!important}
+  .ag-list .dup{display:none}
+  .ag-head h2{font-size:24px}.ag-count{font-size:11px}.ag-title{font-size:17px}.ag-sub{font-size:13px}
+  .ag-date .dn{font-size:26px}.ag-date .dw,.ag-date .dm{font-size:10px}.ag-item{grid-template-columns:48px 1fr}
   .slide{position:relative;display:none;grid-template-columns:1fr;gap:20px}
   .slide.on{display:grid}
   .art{padding:16px}
-  .meta .label,.meta .sep{display:none}
   h1{font-size:34px}
   .date{font-size:13px}.time{font-size:17px}.where{font-size:16px}.blurb{font-size:15px}
   .qr{width:120px}.rsvp .cta{font-size:24px}.rsvp .url{font-size:13px}
-  .next{max-width:none}
 }
 @media (prefers-reduced-motion:reduce){.slide{transition:none}.slide.on .art .wash,.rail i.run{animation:none}}
 </style>
@@ -110,13 +141,18 @@ footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:c
 <div class="screen" id="screen">
   <header>
     <img class="logo" src="assets/empire-logo.png" alt="Empire Scottsdale">
-    <div class="meta"><span class="label">Upcoming events</span><span class="sep"></span><span id="clock"></span></div>
+    <div class="meta"><span id="clock"></span></div>
   </header>
-  <main class="stage" id="stage" aria-live="polite"></main>
+  <div class="main">
+    <main class="stage" id="stage" aria-live="polite"></main>
+    <aside class="agenda" aria-label="Upcoming events">
+      <div class="ag-head"><h2>Upcoming events</h2><span class="ag-count" id="ag-count"></span></div>
+      <div class="ag-window"><ol class="ag-list" id="agenda"></ol></div>
+    </aside>
+  </div>
   <footer>
     <span id="count">–</span>
     <div class="rail"><i id="rail"></i></div>
-    <span class="next" id="next"></span>
   </footer>
 </div>
 
@@ -190,7 +226,7 @@ function fit(slide) {
   if (narrow.matches) { h1.style.fontSize = ""; return; } // phones scroll; the CSS sizes are enough
   const u = Math.min(innerHeight / 100, innerWidth * 0.005625);
   const fits = () => top.scrollHeight <= top.clientHeight + 1;
-  for (let size = 9; size >= 5; size -= 0.25) {
+  for (let size = 8; size >= 4.6; size -= 0.25) {
     h1.style.fontSize = size * u + "px";
     if (h1.offsetHeight <= size * u * 1.04 * 3 + 2 && fits()) return;
   }
@@ -200,6 +236,46 @@ function fit(slide) {
     if (fits()) return;
   }
 }
+
+// Agenda: rebuilt only when the event list changes, then scrolled so the featured event is the top row.
+const agendaEl = document.getElementById("agenda"), fDw = fmt({ weekday: "short" }), fMs = fmt({ month: "short" });
+let agendaKey = "", agendaAt = 0;
+function agendaRow(e, k, dup) {
+  const s = new Date(e.start);
+  return `<li class="ag-item${dup ? " dup" : ""}" data-k="${k}" ${dup ? 'aria-hidden="true"' : ""}>
+    <div class="ag-date"><span class="dw">${fDw.format(s).toUpperCase()}</span><span class="dn">${fDay.format(s)}</span><span class="dm">${fMs.format(s).toUpperCase()}</span></div>
+    <div><div class="ag-title">${esc(e.title)}</div><div class="ag-sub">${t(s)} · ${esc(e.where)}</div></div>
+  </li>`;
+}
+function renderAgenda(list, k, step) {
+  const key = list.map((e) => e.id + e.start).join("|");
+  if (key !== agendaKey) {
+    agendaKey = key;
+    agendaEl.innerHTML = list.map((e, j) => agendaRow(e, j)).join("") +
+      (list.length > 1 ? `<li class="ag-loop dup" aria-hidden="true">Back to the first event</li>` + list.map((e, j) => agendaRow(e, j, true)).join("") : "");
+    agendaAt = -1;
+    const last = new Date(list[list.length - 1].start);
+    document.getElementById("ag-count").textContent = `${list.length} event${list.length > 1 ? "s" : ""} · through ${fShort.format(last)}`;
+  }
+  agendaEl.querySelectorAll(".ag-item").forEach((li) => li.classList.toggle("on", +li.dataset.k === k));
+  const n = list.length;
+  if (agendaAt === n - 1 && k === 0 && step === 1) {
+    // Wrap forwards: glide past the divider onto the duplicate first row, then jump back to the real one.
+    agendaMove(n + 1, true);
+    setTimeout(() => agendaMove(0, false), 950);
+  } else {
+    agendaMove(k, agendaAt >= 0 && Math.abs(k - agendaAt) === 1);
+  }
+  agendaAt = k;
+}
+function agendaMove(idx, animate) {
+  const row = agendaEl.children[idx];
+  if (!row) return;
+  agendaEl.classList.toggle("snap", !animate);
+  agendaEl.style.transform = `translateY(${-row.offsetTop}px)`;
+}
+// Late font loads or a resize change row heights: re-align on the featured row without animating.
+new ResizeObserver(() => { if (agendaAt >= 0) agendaMove(agendaAt, false); }).observe(agendaEl);
 
 function preload() { EVENTS.forEach((e) => { if (e.image) new Image().src = e.image; }); }
 
@@ -234,7 +310,8 @@ function show(step = 1) {
       ? `<div class="empty"><h1>No upcoming events</h1><p>Check back soon.</p></div>`
       : `<div class="empty"><h1>Loading events…</h1></div>`;
     document.getElementById("count").textContent = "";
-    document.getElementById("next").textContent = "";
+    agendaEl.innerHTML = ""; agendaKey = "";
+    document.getElementById("ag-count").textContent = "";
     timer = setTimeout(show, loaded ? SLIDE_MS * 4 : 2000);
     return;
   }
@@ -248,8 +325,7 @@ function show(step = 1) {
   if (old) { old.classList.remove("on"); setTimeout(() => old.remove(), 900); }
   stage.querySelectorAll(".empty").forEach((n) => n.remove());
   document.getElementById("count").textContent = `${i + 1} of ${list.length}`;
-  const n = list[(i + 1) % list.length];
-  document.getElementById("next").innerHTML = list.length > 1 ? `<em>Up next</em><b>${esc(n.title)}</b> · ${fShort.format(new Date(n.start))}` : "";
+  renderAgenda(list, i, step);
   const rail = document.getElementById("rail");
   rail.classList.remove("run"); void rail.offsetWidth; rail.classList.add("run");
   timer = setTimeout(show, SLIDE_MS);
