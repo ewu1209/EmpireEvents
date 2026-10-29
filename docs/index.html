@@ -6,94 +6,111 @@
 <title>Empire Events Board</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Forum&family=Inter+Tight:wght@400;500;600&display=swap">
 <style>
-/* Layout: full-bleed 16:9 lobby screen — date column, headline + details, QR plinth on the right, progress rail along the bottom. Single dark look by choice (venue signage). */
+/* Empire Scottsdale brand (empirescottsdale.com): #131313 ground, #F2B000 gold, white type,
+   Orpheus Pro headings (Forum is the closest free stand-in) and Inter Tight body, 10–12px radii.
+   Layout for a 16:9 lobby TV: flyer panel left, details right, RSVP card bottom-aligned with the flyer.
+   --u is 1% of the screen height (capped by width), so everything scales from 720p to 4K. */
 :root{
-  --ink:#141017; --ink-2:#1e1822; --line:#3a3040;
-  --brass:#cfa968; --brass-dim:#8a7148;
-  --ivory:#f3ece0; --mute:#a99fa8;
-  --display:"Marcellus","Trajan Pro",Georgia,serif;
-  --body:"Figtree","Helvetica Neue",Arial,sans-serif;
+  --bg:#131313; --panel:#1c1c1c; --line:#2c2c2c;
+  --gold:#f2b000; --white:#fff; --mute:rgba(255,255,255,.68); --faint:rgba(255,255,255,.45);
+  --display:"orpheus-pro","Forum",Georgia,serif;
+  --body:"Inter Tight","Helvetica Neue",Arial,sans-serif;
+  --u:min(1vh,.5625vw);
+  --radius:calc(var(--u)*1.2);
   --slide-ms:15000;
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
-html,body{height:100%}
-body{background:var(--ink);color:var(--ivory);font-family:var(--body);overflow:hidden;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.screen{height:100%;display:grid;grid-template-rows:auto 1fr auto;padding-block:clamp(16px,3.2vh,40px);gap:clamp(12px,2.5vh,32px);max-width:1800px;margin:0 auto;cursor:none}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--white);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+.screen{height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:calc(var(--u)*3);
+  padding:calc(var(--u)*3.6) max(16px,calc(var(--u)*5.2));cursor:none}
 .screen.awake{cursor:default}
-header{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-bottom:1px solid var(--line);padding-bottom:clamp(10px,1.8vh,20px)}
-.brand{font-family:var(--display);letter-spacing:.32em;text-transform:uppercase;font-size:clamp(14px,1.5vw,26px);color:var(--brass)}
-.brand small{color:var(--mute);letter-spacing:.18em;font-family:var(--body);font-size:.62em;margin-left:.8em}
-.clock{font-variant-numeric:tabular-nums;color:var(--mute);font-size:clamp(13px,1.2vw,22px);letter-spacing:.06em}
+
+header{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.logo{height:calc(var(--u)*5.4);width:auto;display:block}
+.meta{display:flex;align-items:center;gap:calc(var(--u)*2.4);font-size:calc(var(--u)*2.1);color:var(--mute);font-variant-numeric:tabular-nums}
+.meta .label{color:var(--gold);font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:.82em}
+.meta .sep{width:1px;height:1.2em;background:var(--line)}
 
 .stage{position:relative;min-height:0}
-.slide{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr) auto;align-items:center;gap:clamp(20px,4vw,80px);opacity:0;transform:translateY(1.2vh);transition:opacity .9s ease,transform .9s ease;pointer-events:none}
-.slide.on{opacity:1;transform:none;pointer-events:auto}
-.date{display:grid;justify-items:center;gap:.2em;padding-right:clamp(20px,3vw,56px);border-right:1px solid var(--line);font-variant-numeric:tabular-nums}
-.date .dow{text-transform:uppercase;letter-spacing:.3em;color:var(--brass);font-size:clamp(13px,1.3vw,24px)}
-.date .day{font-family:var(--display);font-size:clamp(64px,10vw,190px);line-height:.9;padding-bottom:.14em} /* Marcellus 3/4/5/7/9 descend below the baseline */
-.date .mon{text-transform:uppercase;letter-spacing:.3em;font-size:clamp(13px,1.3vw,24px)}
-.body{display:grid;gap:clamp(10px,2vh,26px);min-width:0}
-.when{color:var(--brass);letter-spacing:.14em;text-transform:uppercase;font-size:clamp(13px,1.35vw,26px);font-weight:500}
-h1{font-family:var(--display);font-weight:400;margin:0;line-height:1.04;text-wrap:balance;font-size:clamp(30px,4.6vw,92px)}
-h1.long{font-size:clamp(26px,3.4vw,66px)}
-.where{display:flex;align-items:center;gap:.6em;color:var(--ivory);font-size:clamp(15px,1.6vw,30px)}
-.where::before{content:"";width:.55em;height:.55em;border:2px solid var(--brass);transform:rotate(45deg);flex:none}
-.blurb{color:var(--mute);font-size:clamp(15px,1.45vw,28px);line-height:1.45;max-width:38ch;margin:0}
+.slide{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,52fr) minmax(0,48fr);gap:calc(var(--u)*6);
+  opacity:0;transition:opacity .8s ease;pointer-events:none}
+.slide.on{opacity:1;pointer-events:auto}
 
-.plinth{display:grid;justify-items:center;gap:clamp(8px,1.4vh,16px);width:clamp(150px,19vw,340px)}
-.qr{background:var(--ivory);padding:clamp(10px,1.2vw,22px);border-radius:6px;width:100%;aspect-ratio:1;max-width:100%}
-.qr svg{display:block;width:100%;height:100%;fill:var(--ink)}
-.plinth .cap{font-family:var(--display);letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-size:clamp(13px,1.3vw,24px)}
-.plinth .url{color:var(--mute);font-size:clamp(11px,.95vw,17px);text-align:center;overflow-wrap:anywhere}
-.walkin{width:100%;aspect-ratio:1;border:1px solid var(--brass-dim);border-radius:6px;display:grid;place-content:center;text-align:center;gap:.5em;padding:12%}
-.walkin b{font-family:var(--display);font-weight:400;font-size:clamp(22px,2.6vw,48px);line-height:1.1}
-.walkin span{color:var(--mute);font-size:clamp(12px,1.1vw,20px)}
-/* With a flyer: date | text | flyer | QR. Tighter gaps and a smaller headline so the text column keeps its measure. */
-.slide.has-flyer{grid-template-columns:minmax(0,auto) minmax(0,1fr) auto auto;gap:clamp(18px,2.8vw,56px)}
-.has-flyer h1{font-size:clamp(28px,3.7vw,72px)}
-.has-flyer h1.long{font-size:clamp(24px,2.9vw,56px)}
-.has-flyer .plinth{width:clamp(140px,14vw,260px)}
-.flyer{margin:0;padding:clamp(6px,.5vw,10px);border:1px solid var(--brass-dim);border-radius:6px;background:var(--ink-2);line-height:0}
-/* Box is 26vw wide (29vw for landscape banners) and at most min(66vh,26vw) tall; --ar is the flyer's width/height. */
-.flyer img{display:block;width:min(var(--fw,26vw),calc(min(66vh,26vw) * var(--ar,1)));height:auto;border-radius:3px}
-.flyer.wide img{--fw:29vw}
+/* Flyer panel: the flyer whole and as large as fits, over a blurred, darkened copy of itself. */
+.art{position:relative;border-radius:var(--radius);overflow:hidden;background:var(--panel);display:grid;place-items:center;min-height:0}
+.art .wash{position:absolute;inset:-12%;background:center/cover no-repeat;filter:blur(calc(var(--u)*5)) brightness(.42) saturate(1.15);transform:scale(1.04)}
+/* Sized by sizeArt() to the largest box that fits, so small source images scale up too. */
+.art img{position:relative;display:block;max-width:none;border-radius:calc(var(--radius)*.6);box-shadow:0 calc(var(--u)*2) calc(var(--u)*6) rgba(0,0,0,.55)}
+.slide.on .art .wash{animation:drift calc(var(--slide-ms)*1ms) linear forwards}
+@keyframes drift{to{transform:scale(1.12)}}
+/* No flyer: a big date card instead. */
+.art.datecard{background:linear-gradient(160deg,#1f1f1f,#141414);align-content:center;justify-items:center;gap:calc(var(--u)*1)}
+.datecard .dnum{font-family:var(--display);font-size:calc(var(--u)*30);line-height:.85;color:var(--gold)}
+.datecard .dmon{font-weight:600;letter-spacing:.3em;text-transform:uppercase;font-size:calc(var(--u)*2.8)}
 
-footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:clamp(12px,2vw,28px);color:var(--mute);font-size:clamp(12px,1vw,18px);font-variant-numeric:tabular-nums}
-.rail{height:3px;background:var(--line);position:relative;overflow:hidden;border-radius:2px}
-.rail i{position:absolute;inset:0;background:var(--brass);transform-origin:left;transform:scaleX(0)}
+.info{display:flex;flex-direction:column;min-height:0;min-width:0;padding-block:calc(var(--u)*1)}
+.top{display:flex;flex-direction:column;gap:calc(var(--u)*2.2);min-height:0;overflow:hidden}
+.top>*{flex-shrink:0} /* overflow must show up on .top, where fit() measures it, not squash the items */
+.date{color:var(--gold);font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:calc(var(--u)*2.8)}
+.time{font-weight:500;font-size:calc(var(--u)*3.6);margin-top:calc(var(--u)*-1);font-variant-numeric:tabular-nums}
+h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(var(--u)*.2);line-height:1.04;text-wrap:balance;font-size:calc(var(--u)*9)}
+.where{display:flex;align-items:center;gap:.5em;font-size:calc(var(--u)*3);font-weight:500}
+.where svg{width:.95em;height:.95em;flex:none;fill:var(--gold)}
+.blurb{margin:0;color:var(--mute);font-size:calc(var(--u)*2.7);line-height:1.45;max-width:34em;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:var(--clamp,4);overflow:hidden}
+
+/* RSVP card sits on the flyer's bottom edge. */
+.rsvp{margin-top:auto;padding-top:calc(var(--u)*3);display:flex;align-items:center;gap:calc(var(--u)*3)}
+.qr{flex:none;width:calc(var(--u)*22);aspect-ratio:1;background:var(--white);border-radius:var(--radius);padding:calc(var(--u)*1.6)}
+.qr svg{display:block;width:100%;height:100%;fill:#131313}
+.rsvp .cta{font-family:var(--display);font-size:calc(var(--u)*5.2);line-height:1.05}
+.rsvp .url{color:var(--faint);font-size:calc(var(--u)*2.3);margin-top:calc(var(--u)*1);overflow-wrap:anywhere}
+.rsvp .pill{display:inline-block;margin-bottom:calc(var(--u)*1.4);background:var(--gold);color:#131313;font-weight:600;font-size:calc(var(--u)*2);
+  letter-spacing:.14em;text-transform:uppercase;padding:.55em 1em;border-radius:calc(var(--u)*.8)}
+.rsvp.walkin .cta{color:var(--white)}
+.rsvp.walkin .url{color:var(--mute)}
+
+footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:calc(var(--u)*2.6);color:var(--faint);
+  font-size:calc(var(--u)*1.9);font-variant-numeric:tabular-nums}
+.rail{height:calc(var(--u)*.35);min-height:2px;background:var(--line);position:relative;overflow:hidden;border-radius:9px}
+.rail i{position:absolute;inset:0;background:var(--gold);transform-origin:left;transform:scaleX(0)}
 .rail i.run{animation:fill linear forwards;animation-duration:calc(var(--slide-ms) * 1ms)}
 @keyframes fill{to{transform:scaleX(1)}}
-.next{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:32vw}
-.next b{color:var(--ivory);font-weight:500}
-.empty{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:12px}
-.empty h1{font-size:clamp(28px,4vw,72px)}
-.empty p{color:var(--mute);margin:0;font-size:clamp(14px,1.4vw,24px)}
+.next{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
+.next b{color:var(--white);font-weight:500}
+.next em{color:var(--gold);font-style:normal;font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:.85em;margin-right:.6em}
 
+.empty{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:calc(var(--u)*2)}
+.empty h1{font-size:calc(var(--u)*7)}
+.empty p{color:var(--mute);margin:0;font-size:calc(var(--u)*2.6)}
+
+/* Phones and narrow windows: stack and scroll. */
 @media (max-width:760px){
+  :root{--u:1.6vw}
   body{overflow:auto}
-  .screen{height:auto;min-height:100%}
+  .screen{height:auto;min-height:100%;padding:20px 16px}
   .stage{min-height:auto}
-  .slide{position:relative;grid-template-columns:1fr;display:none}
+  .slide{position:relative;display:none;grid-template-columns:1fr;gap:20px}
   .slide.on{display:grid}
-  .date{border-right:0;border-bottom:1px solid var(--line);padding:0 0 12px;justify-items:start;grid-auto-flow:column;align-items:baseline;gap:.5em;justify-content:start}
-  .date .day{font-size:48px}
-  .plinth,.has-flyer .plinth{width:min(240px,100%);justify-self:start}
-  .slide.has-flyer{grid-template-columns:1fr}
-  .flyer{justify-self:start}
-  .flyer img{width:min(100%,calc(60vh * var(--ar,1)))}
+  .art{padding:16px}
+  .meta .label,.meta .sep{display:none}
+  h1{font-size:34px}
+  .date{font-size:13px}.time{font-size:17px}.where{font-size:16px}.blurb{font-size:15px}
+  .qr{width:120px}.rsvp .cta{font-size:24px}.rsvp .url{font-size:13px}
   .next{max-width:none}
 }
-@media (prefers-reduced-motion:reduce){.slide{transition:none;transform:none}.rail i.run{animation:none;transform:scaleX(1)}}
+@media (prefers-reduced-motion:reduce){.slide{transition:none}.slide.on .art .wash,.rail i.run{animation:none}}
 </style>
 
 <div class="screen" id="screen">
   <header>
-    <div class="brand">Empire Scottsdale<small>Upcoming events</small></div>
-    <div class="clock" id="clock"></div>
+    <img class="logo" src="assets/empire-logo.png" alt="Empire Scottsdale">
+    <div class="meta"><span class="label">Upcoming events</span><span class="sep"></span><span id="clock"></span></div>
   </header>
   <main class="stage" id="stage" aria-live="polite"></main>
   <footer>
@@ -113,11 +130,12 @@ const TZ = "America/Phoenix";
 const SLIDE_MS = 15000;
 const stage = document.getElementById("stage");
 const fmt = (o) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, ...o });
-const fDow = fmt({ weekday: "long" }), fDay = fmt({ day: "numeric" }), fMon = fmt({ month: "long" });
+const fDate = fmt({ weekday: "long", month: "long", day: "numeric" }), fDay = fmt({ day: "numeric" }), fMon = fmt({ month: "long" });
 const fTime = fmt({ hour: "numeric", minute: "2-digit" }), fShort = fmt({ month: "short", day: "numeric" });
 const fClock = fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const t = (d) => fTime.format(d).replace(":00", "").replace(" ", " ");
+const t = (d) => fTime.format(d).replace(":00", "");
+const PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
 
 function upcoming() {
   const now = Date.now();
@@ -129,41 +147,61 @@ function slideHTML(e) {
   const sameDay = fShort.format(s) === fShort.format(en) || en - s < 12 * 3600e3;
   const when = sameDay ? `${t(s)} – ${t(en)}` : `${t(s)} · through ${fShort.format(en)}`;
   const url = e.link.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
-  const right = e.qr
-    ? `<div class="qr">${e.qr}</div><div class="cap">Scan to RSVP</div><div class="url">${esc(url)}</div>`
-    : `<div class="walkin"><b>RSVP not required</b><span>Just show up</span></div>`;
-  const r = RATIO[e.image];
-  const flyer = e.image
-    ? `<figure class="flyer${r > 1.2 ? " wide" : ""}"><img src="${esc(e.image)}" alt="" style="--ar:${r || 1}" onload="fitFlyer(this)"></figure>`
-    : "";
-  return `<article class="slide${flyer ? " has-flyer" : ""}">
-    <div class="date"><span class="dow">${fDow.format(s)}</span><span class="day">${fDay.format(s)}</span><span class="mon">${fMon.format(s)}</span></div>
-    <div class="body">
-      <div class="when">${when}</div>
-      <h1 class="${e.title.length > 48 ? "long" : ""}">${esc(e.title)}</h1>
-      <div class="where">${esc(e.where)}</div>
-      ${e.blurb ? `<p class="blurb">${esc(e.blurb)}</p>` : ""}
+  const art = e.image
+    ? `<div class="art"><div class="wash" style="background-image:url('${esc(e.image)}')"></div><img src="${esc(e.image)}" alt="" onload="sizeArt(this)"></div>`
+    : `<div class="art datecard"><span class="dnum">${fDay.format(s)}</span><span class="dmon">${fMon.format(s)}</span></div>`;
+  const rsvp = e.qr
+    ? `<div class="rsvp"><div class="qr">${e.qr}</div><div><div class="cta">Scan to RSVP</div><div class="url">${esc(url)}</div></div></div>`
+    : `<div class="rsvp walkin"><div><span class="pill">No RSVP needed</span><div class="cta">Just show up</div></div></div>`;
+  return `<article class="slide">
+    ${art}
+    <div class="info">
+      <div class="top">
+        <div class="date">${fDate.format(s)}</div>
+        <div class="time">${when}</div>
+        <h1>${esc(e.title)}</h1>
+        <div class="where">${PIN}<span>${esc(e.where)}</span></div>
+        ${e.blurb ? `<p class="blurb">${esc(e.blurb)}</p>` : ""}
+      </div>
+      ${rsvp}
     </div>
-    ${flyer}
-    <div class="plinth">${right}</div>
   </article>`;
 }
 
-// Flyers are sized by aspect ratio (wide banners get a wider box), learned as each image loads.
-const RATIO = {};
-function preload() {
-  EVENTS.forEach((e) => {
-    if (!e.image || e.image in RATIO) return;
-    const img = new Image();
-    img.onload = () => { RATIO[e.image] = img.naturalWidth / img.naturalHeight; };
-    img.src = e.image;
-  });
+// The flyer gets the largest box that fits its panel (inset by 3u), scaling small images up.
+const narrow = matchMedia("(max-width:760px)");
+function sizeArt(img) {
+  if (!img.naturalWidth) return;
+  if (narrow.matches) { img.style.width = "100%"; img.style.height = "auto"; return; }
+  const panel = img.parentElement, pad = 6 * Math.min(innerHeight / 100, innerWidth * 0.005625);
+  const ar = img.naturalWidth / img.naturalHeight;
+  const w = Math.min(panel.clientWidth - pad, (panel.clientHeight - pad) * ar);
+  img.style.width = w + "px";
+  img.style.height = w / ar + "px";
 }
-function fitFlyer(img) {
-  const r = (RATIO[img.src] = img.naturalWidth / img.naturalHeight);
-  img.style.setProperty("--ar", r);
-  img.parentElement.classList.toggle("wide", r > 1.2);
+
+// Make everything fit without squashing: the title shrinks first (to at most three lines), and only
+// if it is already at its smallest does the blurb give up lines. Promo-code lines lead the blurb,
+// so they are the last thing to go.
+function fit(slide) {
+  const img = slide.querySelector(".art img");
+  if (img?.complete) sizeArt(img);
+  const h1 = slide.querySelector("h1"), top = slide.querySelector(".top"), blurb = slide.querySelector(".blurb");
+  if (narrow.matches) { h1.style.fontSize = ""; return; } // phones scroll; the CSS sizes are enough
+  const u = Math.min(innerHeight / 100, innerWidth * 0.005625);
+  const fits = () => top.scrollHeight <= top.clientHeight + 1;
+  for (let size = 9; size >= 5; size -= 0.25) {
+    h1.style.fontSize = size * u + "px";
+    if (h1.offsetHeight <= size * u * 1.04 * 3 + 2 && fits()) return;
+  }
+  if (!blurb) return;
+  for (let lines = 3; lines >= 2; lines--) {
+    blurb.style.setProperty("--clamp", lines);
+    if (fits()) return;
+  }
 }
+
+function preload() { EVENTS.forEach((e) => { if (e.image) new Image().src = e.image; }); }
 
 async function refresh() {
   if (!API) return console.warn("EMPIRE_EVENTS_API is not set in config.js");
@@ -205,12 +243,13 @@ function show(step = 1) {
   const old = stage.querySelector(".slide.on");
   stage.insertAdjacentHTML("beforeend", slideHTML(e));
   const el = stage.lastElementChild;
+  fit(el);
   requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("on")));
-  if (old) { old.classList.remove("on"); setTimeout(() => old.remove(), 1000); }
+  if (old) { old.classList.remove("on"); setTimeout(() => old.remove(), 900); }
   stage.querySelectorAll(".empty").forEach((n) => n.remove());
-  document.getElementById("count").textContent = `${i + 1} / ${list.length}`;
+  document.getElementById("count").textContent = `${i + 1} of ${list.length}`;
   const n = list[(i + 1) % list.length];
-  document.getElementById("next").innerHTML = list.length > 1 ? `Next · <b>${esc(n.title)}</b>, ${fShort.format(new Date(n.start))}` : "";
+  document.getElementById("next").innerHTML = list.length > 1 ? `<em>Up next</em><b>${esc(n.title)}</b> · ${fShort.format(new Date(n.start))}` : "";
   const rail = document.getElementById("rail");
   rail.classList.remove("run"); void rail.offsetWidth; rail.classList.add("run");
   timer = setTimeout(show, SLIDE_MS);
@@ -219,9 +258,10 @@ function show(step = 1) {
 function tick() { document.getElementById("clock").textContent = fClock.format(new Date()); }
 tick(); setInterval(tick, 15000);
 preload();
-show();
-refresh();
+// Measure titles with the real fonts, not the fallbacks.
+(document.fonts?.ready ?? Promise.resolve()).then(() => { show(); refresh(); });
 setInterval(refresh, REFRESH_MS);
+addEventListener("resize", () => { const s = stage.querySelector(".slide.on"); if (s) fit(s); });
 
 document.addEventListener("keydown", (ev) => {
   if (ev.key === "ArrowRight" || ev.key === " ") { ev.preventDefault(); show(1); }
