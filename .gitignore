@@ -7,9 +7,6 @@
 *secret*
 !scripts/set-secrets.sh
 
-# Licensed brand fonts (Lemon Milk, Linotype Spitz): local preview only until web licences are confirmed
-docs/fonts/
-
 # Local tooling
 __pycache__/
 *.pyc
