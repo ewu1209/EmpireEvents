@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script src="config.js"></script>
+<title>Empire Events Board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: full-bleed 16:9 lobby screen — date column, headline + details, QR plinth on the right, progress rail along the bottom. Single dark look by choice (venue signage). */
+:root{
+  --ink:#141017; --ink-2:#1e1822; --line:#3a3040;
+  --brass:#cfa968; --brass-dim:#8a7148;
+  --ivory:#f3ece0; --mute:#a99fa8;
+  --display:"Marcellus","Trajan Pro",Georgia,serif;
+  --body:"Figtree","Helvetica Neue",Arial,sans-serif;
+  --slide-ms:15000;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--ink);color:var(--ivory);font-family:var(--body);overflow:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.screen{height:100%;display:grid;grid-template-rows:auto 1fr auto;padding-block:clamp(16px,3.2vh,40px);gap:clamp(12px,2.5vh,32px);max-width:1800px;margin:0 auto;cursor:none}
+.screen.awake{cursor:default}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-bottom:1px solid var(--line);padding-bottom:clamp(10px,1.8vh,20px)}
+.brand{font-family:var(--display);letter-spacing:.32em;text-transform:uppercase;font-size:clamp(14px,1.5vw,26px);color:var(--brass)}
+.brand small{color:var(--mute);letter-spacing:.18em;font-family:var(--body);font-size:.62em;margin-left:.8em}
+.clock{font-variant-numeric:tabular-nums;color:var(--mute);font-size:clamp(13px,1.2vw,22px);letter-spacing:.06em}
+
+.stage{position:relative;min-height:0}
+.slide{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr) auto;align-items:center;gap:clamp(20px,4vw,80px);opacity:0;transform:translateY(1.2vh);transition:opacity .9s ease,transform .9s ease;pointer-events:none}
+.slide.on{opacity:1;transform:none;pointer-events:auto}
+.date{display:grid;justify-items:center;gap:.2em;padding-right:clamp(20px,3vw,56px);border-right:1px solid var(--line);font-variant-numeric:tabular-nums}
+.date .dow{text-transform:uppercase;letter-spacing:.3em;color:var(--brass);font-size:clamp(13px,1.3vw,24px)}
+.date .day{font-family:var(--display);font-size:clamp(64px,10vw,190px);line-height:.9;padding-bottom:.14em} /* Marcellus 3/4/5/7/9 descend below the baseline */
+.date .mon{text-transform:uppercase;letter-spacing:.3em;font-size:clamp(13px,1.3vw,24px)}
+.body{display:grid;gap:clamp(10px,2vh,26px);min-width:0}
+.when{color:var(--brass);letter-spacing:.14em;text-transform:uppercase;font-size:clamp(13px,1.35vw,26px);font-weight:500}
+h1{font-family:var(--display);font-weight:400;margin:0;line-height:1.04;text-wrap:balance;font-size:clamp(30px,4.6vw,92px)}
+h1.long{font-size:clamp(26px,3.4vw,66px)}
+.where{display:flex;align-items:center;gap:.6em;color:var(--ivory);font-size:clamp(15px,1.6vw,30px)}
+.where::before{content:"";width:.55em;height:.55em;border:2px solid var(--brass);transform:rotate(45deg);flex:none}
+.blurb{color:var(--mute);font-size:clamp(15px,1.45vw,28px);line-height:1.45;max-width:38ch;margin:0}
+
+.plinth{display:grid;justify-items:center;gap:clamp(8px,1.4vh,16px);width:clamp(150px,19vw,340px)}
+.qr{background:var(--ivory);padding:clamp(10px,1.2vw,22px);border-radius:6px;width:100%;aspect-ratio:1;max-width:100%}
+.qr svg{display:block;width:100%;height:100%;fill:var(--ink)}
+.plinth .cap{font-family:var(--display);letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-size:clamp(13px,1.3vw,24px)}
+.plinth .url{color:var(--mute);font-size:clamp(11px,.95vw,17px);text-align:center;overflow-wrap:anywhere}
+.walkin{width:100%;aspect-ratio:1;border:1px solid var(--brass-dim);border-radius:6px;display:grid;place-content:center;text-align:center;gap:.5em;padding:12%}
+.walkin b{font-family:var(--display);font-weight:400;font-size:clamp(22px,2.6vw,48px);line-height:1.1}
+.walkin span{color:var(--mute);font-size:clamp(12px,1.1vw,20px)}
+/* With a flyer: date | text | flyer | QR. Tighter gaps and a smaller headline so the text column keeps its measure. */
+.slide.has-flyer{grid-template-columns:minmax(0,auto) minmax(0,1fr) auto auto;gap:clamp(18px,2.8vw,56px)}
+.has-flyer h1{font-size:clamp(28px,3.7vw,72px)}
+.has-flyer h1.long{font-size:clamp(24px,2.9vw,56px)}
+.has-flyer .plinth{width:clamp(140px,14vw,260px)}
+.flyer{margin:0;padding:clamp(6px,.5vw,10px);border:1px solid var(--brass-dim);border-radius:6px;background:var(--ink-2);line-height:0}
+/* Box is 26vw wide (29vw for landscape banners) and at most min(66vh,26vw) tall; --ar is the flyer's width/height. */
+.flyer img{display:block;width:min(var(--fw,26vw),calc(min(66vh,26vw) * var(--ar,1)));height:auto;border-radius:3px}
+.flyer.wide img{--fw:29vw}
+
+footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:clamp(12px,2vw,28px);color:var(--mute);font-size:clamp(12px,1vw,18px);font-variant-numeric:tabular-nums}
+.rail{height:3px;background:var(--line);position:relative;overflow:hidden;border-radius:2px}
+.rail i{position:absolute;inset:0;background:var(--brass);transform-origin:left;transform:scaleX(0)}
+.rail i.run{animation:fill linear forwards;animation-duration:calc(var(--slide-ms) * 1ms)}
+@keyframes fill{to{transform:scaleX(1)}}
+.next{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:32vw}
+.next b{color:var(--ivory);font-weight:500}
+.empty{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:12px}
+.empty h1{font-size:clamp(28px,4vw,72px)}
+.empty p{color:var(--mute);margin:0;font-size:clamp(14px,1.4vw,24px)}
+
+@media (max-width:760px){
+  body{overflow:auto}
+  .screen{height:auto;min-height:100%}
+  .stage{min-height:auto}
+  .slide{position:relative;grid-template-columns:1fr;display:none}
+  .slide.on{display:grid}
+  .date{border-right:0;border-bottom:1px solid var(--line);padding:0 0 12px;justify-items:start;grid-auto-flow:column;align-items:baseline;gap:.5em;justify-content:start}
+  .date .day{font-size:48px}
+  .plinth,.has-flyer .plinth{width:min(240px,100%);justify-self:start}
+  .slide.has-flyer{grid-template-columns:1fr}
+  .flyer{justify-self:start}
+  .flyer img{width:min(100%,calc(60vh * var(--ar,1)))}
+  .next{max-width:none}
+}
+@media (prefers-reduced-motion:reduce){.slide{transition:none;transform:none}.rail i.run{animation:none;transform:scaleX(1)}}
+</style>
+
+<div class="screen" id="screen">
+  <header>
+    <div class="brand">Empire Scottsdale<small>Upcoming events</small></div>
+    <div class="clock" id="clock"></div>
+  </header>
+  <main class="stage" id="stage" aria-live="polite"></main>
+  <footer>
+    <span id="count">–</span>
+    <div class="rail"><i id="rail"></i></div>
+    <span class="next" id="next"></span>
+  </footer>
+</div>
+
+<script>
+// Events come live from the Cloud Run function (URL in config.js); the last good list is kept for power cuts and outages.
+const API = window.EMPIRE_EVENTS_API;
+const REFRESH_MS = 5 * 60e3, CACHE_KEY = "empire-events";
+let EVENTS = [], loaded = false;
+try { const c = JSON.parse(localStorage.getItem(CACHE_KEY)); if (Array.isArray(c)) { EVENTS = c; loaded = true; } } catch (_) {}
+const TZ = "America/Phoenix";
+const SLIDE_MS = 15000;
+const stage = document.getElementById("stage");
+const fmt = (o) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, ...o });
+const fDow = fmt({ weekday: "long" }), fDay = fmt({ day: "numeric" }), fMon = fmt({ month: "long" });
+const fTime = fmt({ hour: "numeric", minute: "2-digit" }), fShort = fmt({ month: "short", day: "numeric" });
+const fClock = fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const t = (d) => fTime.format(d).replace(":00", "").replace(" ", " ");
+
+function upcoming() {
+  const now = Date.now();
+  return EVENTS.filter((e) => new Date(e.start).getTime() > now);
+}
+
+function slideHTML(e) {
+  const s = new Date(e.start), en = new Date(e.end);
+  const sameDay = fShort.format(s) === fShort.format(en) || en - s < 12 * 3600e3;
+  const when = sameDay ? `${t(s)} – ${t(en)}` : `${t(s)} · through ${fShort.format(en)}`;
+  const url = e.link.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+  const right = e.qr
+    ? `<div class="qr">${e.qr}</div><div class="cap">Scan to RSVP</div><div class="url">${esc(url)}</div>`
+    : `<div class="walkin"><b>RSVP not required</b><span>Just show up</span></div>`;
+  const r = RATIO[e.image];
+  const flyer = e.image
+    ? `<figure class="flyer${r > 1.2 ? " wide" : ""}"><img src="${esc(e.image)}" alt="" style="--ar:${r || 1}" onload="fitFlyer(this)"></figure>`
+    : "";
+  return `<article class="slide${flyer ? " has-flyer" : ""}">
+    <div class="date"><span class="dow">${fDow.format(s)}</span><span class="day">${fDay.format(s)}</span><span class="mon">${fMon.format(s)}</span></div>
+    <div class="body">
+      <div class="when">${when}</div>
+      <h1 class="${e.title.length > 48 ? "long" : ""}">${esc(e.title)}</h1>
+      <div class="where">${esc(e.where)}</div>
+      ${e.blurb ? `<p class="blurb">${esc(e.blurb)}</p>` : ""}
+    </div>
+    ${flyer}
+    <div class="plinth">${right}</div>
+  </article>`;
+}
+
+// Flyers are sized by aspect ratio (wide banners get a wider box), learned as each image loads.
+const RATIO = {};
+function preload() {
+  EVENTS.forEach((e) => {
+    if (!e.image || e.image in RATIO) return;
+    const img = new Image();
+    img.onload = () => { RATIO[e.image] = img.naturalWidth / img.naturalHeight; };
+    img.src = e.image;
+  });
+}
+function fitFlyer(img) {
+  const r = (RATIO[img.src] = img.naturalWidth / img.naturalHeight);
+  img.style.setProperty("--ar", r);
+  img.parentElement.classList.toggle("wide", r > 1.2);
+}
+
+async function refresh() {
+  if (!API) return console.warn("EMPIRE_EVENTS_API is not set in config.js");
+  try {
+    const r = await fetch(API, { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    const { events } = await r.json();
+    if (!Array.isArray(events)) throw new Error("bad response");
+    const wasEmpty = !upcoming().length;
+    EVENTS = events;
+    loaded = true;
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(EVENTS)); } catch (_) {}
+    preload();
+    if (wasEmpty) show(); // leave "Loading…" / "No upcoming events" straight away
+  } catch (err) {
+    console.warn("events refresh failed; keeping last list", err);
+  }
+}
+
+// Reload once a day between slides so page updates pushed to GitHub Pages reach the TV.
+const BOOTED = Date.now();
+
+let i = (parseInt(location.hash.slice(1), 10) || 1) - 2, timer; // #3 opens on the third slide
+function show(step = 1) {
+  if (Date.now() - BOOTED > 24 * 3600e3 && navigator.onLine) return location.reload();
+  const list = upcoming();
+  clearTimeout(timer);
+  if (!list.length) {
+    stage.innerHTML = loaded
+      ? `<div class="empty"><h1>No upcoming events</h1><p>Check back soon.</p></div>`
+      : `<div class="empty"><h1>Loading events…</h1></div>`;
+    document.getElementById("count").textContent = "";
+    document.getElementById("next").textContent = "";
+    timer = setTimeout(show, loaded ? SLIDE_MS * 4 : 2000);
+    return;
+  }
+  i = (i + step + list.length) % list.length;
+  const e = list[i];
+  const old = stage.querySelector(".slide.on");
+  stage.insertAdjacentHTML("beforeend", slideHTML(e));
+  const el = stage.lastElementChild;
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("on")));
+  if (old) { old.classList.remove("on"); setTimeout(() => old.remove(), 1000); }
+  stage.querySelectorAll(".empty").forEach((n) => n.remove());
+  document.getElementById("count").textContent = `${i + 1} / ${list.length}`;
+  const n = list[(i + 1) % list.length];
+  document.getElementById("next").innerHTML = list.length > 1 ? `Next · <b>${esc(n.title)}</b>, ${fShort.format(new Date(n.start))}` : "";
+  const rail = document.getElementById("rail");
+  rail.classList.remove("run"); void rail.offsetWidth; rail.classList.add("run");
+  timer = setTimeout(show, SLIDE_MS);
+}
+
+function tick() { document.getElementById("clock").textContent = fClock.format(new Date()); }
+tick(); setInterval(tick, 15000);
+preload();
+show();
+refresh();
+setInterval(refresh, REFRESH_MS);
+
+document.addEventListener("keydown", (ev) => {
+  if (ev.key === "ArrowRight" || ev.key === " ") { ev.preventDefault(); show(1); }
+  if (ev.key === "ArrowLeft") show(-1);
+  if (ev.key === "f") document.documentElement.requestFullscreen?.().catch(() => {});
+});
+const screenEl = document.getElementById("screen");
+let idle;
+document.addEventListener("mousemove", () => { screenEl.classList.add("awake"); clearTimeout(idle); idle = setTimeout(() => screenEl.classList.remove("awake"), 3000); });
+document.addEventListener("click", () => document.documentElement.requestFullscreen?.().catch(() => {}));
+async function wake() { try { await navigator.wakeLock?.request("screen"); } catch (_) {} }
+wake(); document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && wake());
+</script>

@@ -1,0 +1,15 @@
+# Secrets never belong in this public repo
+.env
+.env.*
+*.key
+*.pem
+*credentials*.json
+*secret*
+
+# Local tooling
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+.claude/
