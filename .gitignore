@@ -5,6 +5,7 @@
 *.pem
 *credentials*.json
 *secret*
+!scripts/set-secrets.sh
 
 # Local tooling
 __pycache__/

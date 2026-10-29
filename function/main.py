@@ -4,7 +4,7 @@ Every request is answered from a 5-minute in-memory cache; on a miss it calls th
 OfficeRnD public API. Credentials come only from environment variables (mapped
 from Secret Manager at deploy time) and are never logged or returned.
 """
-import html, json, logging, os, re, time, urllib.parse, urllib.request
+import html, json, logging, os, re, time, urllib.error, urllib.parse, urllib.request
 from datetime import datetime, timezone
 
 import functions_framework
@@ -33,8 +33,8 @@ def _access_token():
     if _token["value"] and time.time() < _token["expires"]:
         return _token["value"]
     body = urllib.parse.urlencode({
-        "client_id": os.environ["OFFICERND_CLIENT_ID"],
-        "client_secret": os.environ["OFFICERND_CLIENT_SECRET"],
+        "client_id": os.environ["OFFICERND_CLIENT_ID"].strip(),  # pasted values often carry a newline
+        "client_secret": os.environ["OFFICERND_CLIENT_SECRET"].strip(),
         "grant_type": "client_credentials",
         "scope": SCOPE,
     }).encode()
@@ -42,7 +42,9 @@ def _access_token():
         try:
             tok = _http(url, body, {"Content-Type": "application/x-www-form-urlencoded"})
         except Exception as e:  # message holds the URL and status only, never the form body
-            logging.warning("token request to %s failed: %s", url, e)
+            # The OAuth error response ({"error": "invalid_client", ...}) says why; it never echoes the secret.
+            detail = e.read(300).decode(errors="replace") if isinstance(e, urllib.error.HTTPError) else ""
+            logging.warning("token request to %s failed: %s %s", url, e, detail)
             continue
         _token.update(value=tok["access_token"], expires=time.time() + int(tok.get("expires_in", 3600)) - 120)
         return _token["value"]

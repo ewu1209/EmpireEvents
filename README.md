@@ -24,33 +24,32 @@ The blurb is the opening of the event's OfficeRnD description, trimmed to about 
 
 ## Deploying the function
 
-You need an OfficeRnD API app (**Settings → Developer Tools**) with the scope `flex.collaboration.events.read`, plus a Google Cloud project with billing enabled.
+**Live setup:** Google Cloud project `empire-events-2610`, region `us-west1`, function `empire-events`, running as the service account `empire-events-fn@empire-events-2610.iam.gserviceaccount.com`. That account can do only one thing: read the two OfficeRnD secrets. The OfficeRnD API app is **EmpireEvents TV** (Settings → Data & Extensibility → Developer Tools), which has the single scope `flex.collaboration.events.read`. Tokens come from `https://identity.officernd.com/oauth/token`.
+
+From scratch:
 
 ```bash
-gcloud config set project YOUR_PROJECT_ID
+P=empire-events-2610
 gcloud services enable cloudfunctions.googleapis.com run.googleapis.com cloudbuild.googleapis.com \
-  artifactregistry.googleapis.com secretmanager.googleapis.com
+  artifactregistry.googleapis.com secretmanager.googleapis.com --project=$P
 
-# Store the credentials in Secret Manager. They are typed at a hidden prompt, so they stay out of shell history.
-printf 'OfficeRnD client ID: '; read -rs ID; echo
-printf '%s' "$ID" | gcloud secrets create officernd-client-id --data-file=- && unset ID
-printf 'OfficeRnD client secret: '; read -rs SECRET; echo
-printf '%s' "$SECRET" | gcloud secrets create officernd-client-secret --data-file=- && unset SECRET
+# Runtime identity that can only read the two secrets
+gcloud iam service-accounts create empire-events-fn --project=$P
+scripts/set-secrets.sh $P        # prompts for client ID and secret (hidden), stores them, grants access
 
-# Let the function's runtime service account read them
-SA="$(gcloud projects describe "$(gcloud config get project)" --format='value(projectNumber)')-compute@developer.gserviceaccount.com"
-for s in officernd-client-id officernd-client-secret; do
-  gcloud secrets add-iam-policy-binding $s --member="serviceAccount:$SA" --role=roles/secretmanager.secretAccessor
-done
-
-gcloud functions deploy empire-events --gen2 --runtime=python312 --region=us-west1 \
+gcloud functions deploy empire-events --project=$P --gen2 --runtime=python312 --region=us-west1 \
   --source=function --entry-point=events --trigger-http --allow-unauthenticated \
   --memory=256Mi --max-instances=3 \
-  --set-env-vars=OFFICERND_ORG=empire,ALLOWED_ORIGIN=https://YOUR_GITHUB_USER.github.io \
+  --service-account=empire-events-fn@$P.iam.gserviceaccount.com \
+  --set-env-vars=OFFICERND_ORG=empire,ALLOWED_ORIGIN=https://ewu1209.github.io \
   --set-secrets=OFFICERND_CLIENT_ID=officernd-client-id:latest,OFFICERND_CLIENT_SECRET=officernd-client-secret:latest
 ```
 
-Put the function URL that the deploy prints into `docs/config.js`, then commit and push. To rotate the credentials, run `gcloud secrets versions add …` and redeploy.
+Put the function URL that the deploy prints into `docs/config.js`, then commit and push.
+
+**Rotating credentials:** add new secret versions (`gcloud secrets versions add officernd-client-secret --data-file=-`), then redeploy. You can leave out `--allow-unauthenticated`, because the public access setting persists. A secret is read only when an instance starts.
+
+**Troubleshooting:** the function logs OfficeRnD's OAuth error text, which never includes the secret. If you see `invalid_client`, the stored ID and secret don't match the OfficeRnD app.
 
 The function is public by design: the TV can't sign in. It returns only what the screen shows, which is title, times, place, blurb, RSVP link, flyer URL and QR code.
 
