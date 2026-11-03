@@ -26,7 +26,7 @@
    --u is 1% of the screen height (capped by width), so everything scales from 720p to 4K. */
 :root{
   --bg:#131313; --panel:#1c1c1c; --line:#2c2c2c;
-  --gold:#f2b000; --white:#fff; --mute:rgba(255,255,255,.68); --faint:rgba(255,255,255,.45);
+  --gold:#f2b000; --white:#fff; --ivory:#ebe5d9; --mute:rgba(255,255,255,.68); --faint:rgba(255,255,255,.45);
   --display:"Lemon Milk","Forum",Georgia,serif;
   --body:"Linotype Spitz","Inter Tight","Helvetica Neue",Arial,sans-serif;
   --u:min(1vh,.5625vw);
@@ -115,6 +115,43 @@ h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(va
   font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:calc(var(--u)*1.45)}
 .ag-loop::before,.ag-loop::after{content:"";flex:1;height:1px;background:var(--line)}
 
+/* Member perks: a page of OfficeRnD benefits (up to four) between event slides. It lives in .wide, a layer
+   over the whole main area, and has an opaque ground, so it fades in over the event slide and the agenda alike. */
+.main{position:relative}
+.wide{position:absolute;inset:0;pointer-events:none}
+.wide .slide{background:var(--bg)}
+.slide.perks{display:flex;flex-direction:column;gap:calc(var(--u)*3)}
+.pk-head{display:flex;align-items:flex-end;justify-content:space-between;gap:calc(var(--u)*3)}
+.pk-head h1{margin:0;font-size:calc(var(--u)*5.6);line-height:1}
+.pk-note{color:var(--mute);font-size:calc(var(--u)*2.6);text-align:right}
+.pk-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--cols,4),minmax(0,1fr));gap:calc(var(--u)*2.6);
+  justify-content:center}
+.pk{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0;background:var(--panel);border-radius:var(--radius);overflow:hidden}
+/* Image panel. Until the image is sorted (see look()), only the empty panel shows. Then:
+   .is-photo - shown whole over a blurred, darkened copy of itself;
+   .is-logo  - on a solid ground matching the logo's own edge colour (set inline), so a logo that comes
+             in its own box fills the panel instead of floating like a sticker;
+   .is-blend - a white-boxed logo: ivory ground, multiplied, so its white box becomes the ivory. */
+.pk-img{position:relative;min-height:0;background:#202020;overflow:hidden;transition:background-color .4s}
+.pk-img img,.pk-img .wash{opacity:0;transition:opacity .4s}
+.pk-img.is-photo img,.pk-img.is-photo .wash,.pk-img.is-logo img{opacity:1}
+.pk-img .wash{position:absolute;inset:-15%;background:center/cover no-repeat;filter:blur(calc(var(--u)*3)) brightness(.45) saturate(1.1)}
+.pk-img img{position:absolute;inset:calc(var(--u)*2);width:calc(100% - var(--u)*4);height:calc(100% - var(--u)*4);object-fit:contain}
+.pk-img.is-photo img{filter:drop-shadow(0 calc(var(--u)*.8) calc(var(--u)*2) rgba(0,0,0,.5))}
+.pk-img.is-logo img{inset:14%;width:72%;height:72%}
+.pk-img.is-bleed img{inset:0;width:100%;height:100%}
+.pk-img.is-blend{background:var(--ivory)}
+.pk-img.is-blend img{mix-blend-mode:multiply}
+.pk-img.mono{display:grid;place-items:center;font-family:var(--display);color:var(--gold);font-size:calc(var(--u)*9)}
+.pk-body{padding:calc(var(--u)*2.4) calc(var(--u)*2.6) calc(var(--u)*2.8);display:grid;gap:calc(var(--u)*1);align-content:start;
+  height:calc(var(--u)*30);overflow:hidden} /* fixed, so every image panel on a page is the same size */
+.pk-cat{color:var(--gold);font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:calc(var(--u)*1.8);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pk-name{font-family:var(--display);font-size:calc(var(--u)*3.1);line-height:1.1;text-wrap:pretty;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.pk-offer{margin:0;color:rgba(255,255,255,.86);font-size:calc(var(--u)*2.55);line-height:1.36;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
+
 footer{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:calc(var(--u)*2.6);color:var(--faint);
   font-size:calc(var(--u)*1.9);font-variant-numeric:tabular-nums}
 .rail{height:calc(var(--u)*.35);min-height:2px;background:var(--line);position:relative;overflow:hidden;border-radius:9px}
@@ -145,6 +182,11 @@ footer{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:calc(v
   h1{font-size:34px}
   .date{font-size:13px}.time{font-size:17px}.where{font-size:16px}.blurb{font-size:15px}
   .qr{width:120px}.rsvp .cta{font-size:24px}.rsvp .url{font-size:13px}
+  .wide{position:static}.wide:empty{display:none}
+  .slide.perks{display:none}.slide.perks.on{display:flex}
+  .pk-head{flex-direction:column;align-items:flex-start}.pk-note{text-align:left;font-size:14px}
+  .pk-grid{grid-template-columns:1fr 1fr!important}.pk-img{aspect-ratio:1}
+  .pk-name{font-size:17px}.pk-cat{font-size:10px}.pk-offer{font-size:14px}.pk-body{min-height:0;padding:12px}
 }
 @media (prefers-reduced-motion:reduce){.slide{transition:none}.slide.on .art .wash,.rail i.run{animation:none}}
 </style>
@@ -160,6 +202,7 @@ footer{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:calc(v
       <div class="ag-head"><h2>Upcoming events</h2><span class="ag-count" id="ag-count"></span></div>
       <div class="ag-window"><ol class="ag-list" id="agenda"></ol></div>
     </aside>
+    <div class="wide" id="wide" aria-live="polite"></div>
   </div>
   <footer>
     <span id="count">–</span>
@@ -170,12 +213,13 @@ footer{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:calc(v
 <script>
 // Events come live from the Cloud Run function (URL in config.js); the last good list is kept for power cuts and outages.
 const API = window.EMPIRE_EVENTS_API;
-const REFRESH_MS = 5 * 60e3, CACHE_KEY = "empire-events";
-let EVENTS = [], loaded = false;
+const REFRESH_MS = 5 * 60e3, CACHE_KEY = "empire-events", PERKS_KEY = "empire-perks";
+let EVENTS = [], PERKS = [], loaded = false;
 try { const c = JSON.parse(localStorage.getItem(CACHE_KEY)); if (Array.isArray(c)) { EVENTS = c; loaded = true; } } catch (_) {}
+try { const c = JSON.parse(localStorage.getItem(PERKS_KEY)); if (Array.isArray(c)) PERKS = c; } catch (_) {}
 const TZ = "America/Phoenix";
 const SLIDE_MS = 15000;
-const stage = document.getElementById("stage");
+const stage = document.getElementById("stage"), wide = document.getElementById("wide");
 const fmt = (o) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, ...o });
 const fDate = fmt({ weekday: "long", month: "long", day: "numeric" }), fDay = fmt({ day: "numeric" }), fMon = fmt({ month: "long" });
 const fTime = fmt({ hour: "numeric", minute: "2-digit" }), fShort = fmt({ month: "short", day: "numeric" });
@@ -211,6 +255,127 @@ function slideHTML(e) {
         ${e.blurb ? `<p class="blurb">${esc(e.blurb)}</p>` : ""}
       </div>
       ${rsvp}
+    </div>
+  </article>`;
+}
+
+// Member perks: pages of at most four, as even as possible (18 → 4,4,4,3,3), never one slide per perk.
+const PERKS_PER_PAGE = 4;
+function perkPages() {
+  const n = PERKS.length;
+  if (!n) return [];
+  const pages = Math.ceil(n / PERKS_PER_PAGE), base = Math.floor(n / pages), extra = n % pages, out = [];
+  for (let p = 0, at = 0; p < pages; p++) { const size = base + (p < extra ? 1 : 0); out.push(PERKS.slice(at, at + size)); at += size; }
+  return out;
+}
+
+// The running order: every event once, with the perk pages spread as evenly as the counts allow
+// (12 events, 5 pages → a page after events 2, 5, 7, 10 and 12). Items are {k: event index} or {p: page index}.
+function deck(list, pages) {
+  if (!pages.length) return list.map((_, k) => ({ k }));
+  if (!list.length) return pages.map((_, p) => ({ p }));
+  const n = list.length, out = [];
+  let p = 0;
+  list.forEach((_, k) => {
+    out.push({ k });
+    while (p < pages.length && k + 1 >= Math.round(((p + 1) * n) / pages.length)) out.push({ p: p++ });
+  });
+  return out;
+}
+
+// Sort each perk image once, from a 48px copy: a photo, or a logo with a solid (or transparent) edge.
+// A logo gets a ground matching its own edge, so a logo that comes in a white or black box fills the
+// panel instead of floating on it. The CDN sends Access-Control-Allow-Origin: *, so the canvas is readable;
+// if it ever isn't, the image is simply treated as a photo.
+const LOOKS = new Map();
+function look(url) {
+  if (!LOOKS.has(url)) LOOKS.set(url, new Promise((done) => {
+    const im = new Image();
+    im.crossOrigin = "anonymous";
+    im.onload = () => { try { done(classify(im)); } catch (_) { done({ mode: "is-photo" }); } };
+    im.onerror = () => done({ mode: "is-photo" });
+    im.src = url;
+  }));
+  return LOOKS.get(url);
+}
+function classify(im) {
+  const N = 48, c = document.createElement("canvas");
+  c.width = c.height = N;
+  const x = c.getContext("2d", { willReadFrequently: true });
+  x.drawImage(im, 0, 0, N, N);
+  const d = x.getImageData(0, 0, N, N).data, lum = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b, edge = [];
+  for (let y = 0; y < N; y++) for (let X = 0; X < N; X++) {
+    if (y > 1 && y < N - 2 && X > 1 && X < N - 2) continue;
+    const o = (y * N + X) * 4;
+    edge.push([d[o], d[o + 1], d[o + 2], d[o + 3]]);
+  }
+  if (edge.filter((q) => q[3] < 40).length / edge.length > 0.6) {
+    // Transparent logo: dark ink goes on ivory, light ink on charcoal.
+    let sum = 0, cnt = 0;
+    for (let o = 0; o < d.length; o += 4) if (d[o + 3] > 128) { sum += lum(d[o], d[o + 1], d[o + 2]); cnt++; }
+    return cnt && sum / cnt < 140 ? { mode: "is-logo is-blend" } : { mode: "is-logo", bg: "#262626" };
+  }
+  const solid = edge.filter((q) => q[3] >= 40);
+  const med = [0, 1, 2].map((i) => solid.map((q) => q[i]).sort((a, b) => a - b)[solid.length >> 1]);
+  const close = (q) => q[3] >= 40 && Math.hypot(q[0] - med[0], q[1] - med[1], q[2] - med[2]) < 36;
+  // Solid ground: two whole sides in the edge colour, or half the edge (wordmarks often run into the edges).
+  const sides = [edge.slice(0, 2 * N), edge.slice(-2 * N), edge.filter((_, j) => j >= 2 * N && j < edge.length - 2 * N && j % 4 < 2),
+    edge.filter((_, j) => j >= 2 * N && j < edge.length - 2 * N && j % 4 >= 2)];
+  const solidSides = sides.filter((side) => side.filter(close).length / side.length > 0.9).length;
+  if (solidSides < 2 && edge.filter(close).length / edge.length < 0.5) return { mode: "is-photo" };
+  // Cut-out logos (transparent shapes inside an opaque box) would vanish on a matching ground.
+  let holes = 0;
+  for (let o = 3; o < d.length; o += 4) if (d[o] < 40) holes++;
+  if (holes / (N * N) > 0.04) return { mode: "is-photo" };
+  if (lum(...med) > 200) return { mode: "is-logo is-blend" }; // white box → ivory, multiplied
+  // A coloured ground that isn't quite the image's whole edge (art running into the edge): span the full width.
+  const partial = edge.filter(close).length / edge.length < 0.85;
+  return { mode: partial ? "is-logo is-bleed" : "is-logo", bg: `rgb(${med.join(",")})` };
+}
+function dressImages(root) {
+  root.querySelectorAll(".pk-img[data-src]").forEach((el) => look(el.dataset.src).then((r) => {
+    el.className = `pk-img ${r.mode}`;
+    if (r.bg) el.style.backgroundColor = r.bg;
+  }));
+}
+
+// Long names shrink (down to 2.5u) to stay on two lines; if a long word still forces a third line,
+// the name gets it and the offer gives up one line instead.
+function fitPerks(slide) {
+  if (narrow.matches) return;
+  const u = Math.min(innerHeight / 100, innerWidth * 0.005625);
+  slide.querySelectorAll(".pk").forEach((card) => {
+    const n = card.querySelector(".pk-name"), offer = card.querySelector(".pk-offer");
+    n.style.webkitLineClamp = "none"; // measure the real line count
+    let lines = 0;
+    for (let size = 3.1; size >= 2.49; size -= 0.2) {
+      n.style.fontSize = size * u + "px";
+      lines = Math.round(n.getBoundingClientRect().height / (size * u * 1.1));
+      if (lines <= 2) break;
+    }
+    n.style.webkitLineClamp = lines > 2 ? 3 : "";
+    if (offer) offer.style.webkitLineClamp = lines > 2 ? 3 : "";
+  });
+}
+
+const initial = (s) => esc(s.replace(/^the\s+/i, "").charAt(0).toUpperCase());
+function perksHTML(page) {
+  return `<article class="slide perks">
+    <div class="pk-head">
+      <h1>Member perks</h1>
+      <div class="pk-note">Details and codes in the Empire app</div>
+    </div>
+    <div class="pk-grid" style="--cols:${Math.max(page.length, 3)}">${page.map((b) => `
+      <div class="pk">
+        ${b.image
+          ? `<div class="pk-img" data-src="${esc(b.image)}"><div class="wash" style="background-image:url('${esc(b.image)}')"></div><img src="${esc(b.image)}" alt=""></div>`
+          : `<div class="pk-img mono">${initial(b.name)}</div>`}
+        <div class="pk-body">
+          <div class="pk-cat">${b.category ? esc(b.category) : "&nbsp;"}</div>
+          <div class="pk-name">${esc(b.name)}</div>
+          ${b.offer ? `<p class="pk-offer">${esc(b.offer)}</p>` : ""}
+        </div>
+      </div>`).join("")}
     </div>
   </article>`;
 }
@@ -298,19 +463,24 @@ function agendaMove(idx, animate) {
 // Late font loads or a resize change row heights: re-align on the featured row without animating.
 new ResizeObserver(() => { if (agendaCur >= 0) agendaMove(agendaCur, false); }).observe(agendaEl);
 
-function preload() { EVENTS.forEach((e) => { if (e.image) new Image().src = e.image; }); }
+function preload() {
+  EVENTS.forEach((e) => { if (e.image) new Image().src = e.image; });
+  PERKS.forEach((b) => { if (b.image) { new Image().src = b.image; look(b.image); } });
+}
 
 async function refresh() {
   if (!API) return console.warn("EMPIRE_EVENTS_API is not set in config.js");
   try {
     const r = await fetch(API, { cache: "no-store" });
     if (!r.ok) throw new Error(r.status);
-    const { events } = await r.json();
+    const { events, benefits } = await r.json();
     if (!Array.isArray(events)) throw new Error("bad response");
-    const wasEmpty = !upcoming().length;
+    const wasEmpty = !upcoming().length && !PERKS.length;
     EVENTS = events;
+    // benefits is null when the function couldn't fetch them: keep the perks we have.
+    if (Array.isArray(benefits)) PERKS = benefits;
     loaded = true;
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify(EVENTS)); } catch (_) {}
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(EVENTS)); localStorage.setItem(PERKS_KEY, JSON.stringify(PERKS)); } catch (_) {}
     preload();
     if (wasEmpty) show(); // leave "Loading…" / "No upcoming events" straight away
   } catch (err) {
@@ -324,9 +494,10 @@ const BOOTED = Date.now();
 let i = (parseInt(location.hash.slice(1), 10) || 1) - 2, timer; // #3 opens on the third slide
 function show(step = 1) {
   if (Date.now() - BOOTED > 24 * 3600e3 && navigator.onLine) return location.reload();
-  const list = upcoming();
+  const list = upcoming(), pages = perkPages(), d = deck(list, pages);
   clearTimeout(timer);
-  if (!list.length) {
+  if (!d.length) {
+    wide.innerHTML = "";
     stage.innerHTML = loaded
       ? `<div class="empty"><h1>No upcoming events</h1><p>Check back soon.</p></div>`
       : `<div class="empty"><h1>Loading events…</h1></div>`;
@@ -336,14 +507,16 @@ function show(step = 1) {
     timer = setTimeout(show, loaded ? SLIDE_MS * 4 : 2000);
     return;
   }
-  i = (i + step + list.length) % list.length;
-  const e = list[i];
-  stage.insertAdjacentHTML("beforeend", slideHTML(e));
-  const el = stage.lastElementChild;
-  fit(el);
+  i = (i + step + d.length) % d.length;
+  const item = d[i], isPerks = item.p !== undefined;
+  const host = isPerks ? wide : stage;
+  host.insertAdjacentHTML("beforeend", isPerks ? perksHTML(pages[item.p]) : slideHTML(list[item.k]));
+  const el = host.lastElementChild;
+  if (isPerks) { dressImages(el); fitPerks(el); }
+  if (!isPerks) fit(el);
   // Retire every other slide: the newest one fades out, anything older goes now. Don't rely on
   // requestAnimationFrame here: hidden tabs and sleeping TVs pause it, and slides would pile up.
-  const others = [...stage.querySelectorAll(".slide")].filter((s) => s !== el);
+  const others = [...document.querySelectorAll(".stage .slide, .wide .slide")].filter((s) => s !== el);
   others.forEach((s, j) => {
     s.classList.remove("on");
     if (j < others.length - 1) s.remove(); else setTimeout(() => s.remove(), 900);
@@ -351,8 +524,16 @@ function show(step = 1) {
   void el.offsetWidth; // commit the hidden state so the fade-in still animates
   el.classList.add("on");
   stage.querySelectorAll(".empty").forEach((n) => n.remove());
-  document.getElementById("count").textContent = `${i + 1} of ${list.length}`;
-  renderAgenda(list, i, step);
+  document.getElementById("count").textContent = isPerks
+    ? `Member perks · ${item.p + 1} of ${pages.length}` : `${item.k + 1} of ${list.length}`;
+  if (!isPerks) renderAgenda(list, item.k, step);
+  else if (list.length) {
+    // Hold the agenda on the event just shown (or the last one), with nothing highlighted.
+    let j = i;
+    while (j > 0 && d[j].k === undefined) j--;
+    renderAgenda(list, d[j].k ?? list.length - 1, 0);
+    agendaEl.querySelectorAll(".ag-item.on").forEach((li) => li.classList.remove("on"));
+  } else { agendaEl.innerHTML = ""; agendaKey = ""; document.getElementById("ag-count").textContent = ""; }
   const rail = document.getElementById("rail");
   rail.classList.remove("run"); void rail.offsetWidth; rail.classList.add("run");
   timer = setTimeout(show, SLIDE_MS);
@@ -365,7 +546,7 @@ preload();
 (document.fonts?.ready ?? Promise.resolve()).then(() => { show(); refresh(); });
 setInterval(refresh, REFRESH_MS);
 // Refit when the window changes or a web font finishes loading (its metrics differ from the fallback's).
-const refit = () => stage.querySelectorAll(".slide").forEach(fit);
+const refit = () => { stage.querySelectorAll(".slide").forEach(fit); wide.querySelectorAll(".slide").forEach(fitPerks); };
 addEventListener("resize", refit);
 document.fonts?.addEventListener("loadingdone", refit);
 

@@ -7,11 +7,18 @@
   adds a tiny watcher that reloads the page whenever a file in docs/ changes.
 - /__events fetches the deployed function server-side (so its CORS rule doesn't
   apply) and caches the answer for a minute to keep OfficeRnD calls low.
+- If the live answer has no benefits yet and scripts/benefits.local.json exists (a raw
+  OfficeRnD benefits list, gitignored), those are shaped with function/benefits.py and
+  added, so the perk slides can be previewed before the function is redeployed.
 Standard library only.
 """
 import http.server, json, os, sys, time, urllib.request
 
-ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs")
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.join(HERE, "..", "docs")
+LOCAL_BENEFITS = os.path.join(HERE, "benefits.local.json")
+sys.path.insert(0, os.path.join(HERE, "..", "function"))
+from benefits import shape_benefits  # noqa: E402  (standard library only)
 LIVE = "https://us-west1-empire-events-2610.cloudfunctions.net/empire-events"
 PORT = int(os.environ.get("PORT", "8770"))
 _cache = {"body": None, "at": 0}
@@ -57,7 +64,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             if not _cache["body"] or time.time() - _cache["at"] > 60:
                 try:
                     with urllib.request.urlopen(LIVE, timeout=20) as r:
-                        _cache.update(body=r.read(), at=time.time())
+                        data = json.loads(r.read())
+                    if not data.get("benefits") and os.path.exists(LOCAL_BENEFITS):
+                        with open(LOCAL_BENEFITS) as f:
+                            data["benefits"] = shape_benefits(json.load(f))
+                    _cache.update(body=json.dumps(data).encode(), at=time.time())
                 except Exception as e:
                     if not _cache["body"]:
                         return self.send(json.dumps({"error": str(e)}), "application/json", 502)

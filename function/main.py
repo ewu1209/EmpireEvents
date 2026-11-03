@@ -10,16 +10,20 @@ from datetime import datetime, timezone
 import functions_framework
 import qrcode
 
+from benefits import shape_benefits
+
 ORG = os.environ.get("OFFICERND_ORG", "empire")
-API = f"https://app.officernd.com/api/v2/organizations/{ORG}/events"
+BASE = f"https://app.officernd.com/api/v2/organizations/{ORG}"
 # The auth guide and the OpenAPI spec name different token paths; try both.
 TOKEN_URLS = ["https://identity.officernd.com/oauth/token", "https://identity.officernd.com/auth/token"]
-SCOPE = "flex.collaboration.events.read"
+EVENTS_SCOPE = "flex.collaboration.events.read"
+# Optional: without this scope on the OfficeRnD app, the board just shows no perk slides.
+BENEFITS_SCOPE = "flex.collaboration.benefits.read"
 ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", "*")
 CACHE_SECONDS = int(os.environ.get("CACHE_SECONDS", "300"))
 UA = {"User-Agent": "EmpireEvents/1.0"}
 
-_token = {"value": None, "expires": 0}
+_tokens = {}  # scope -> {"value", "expires"}; one token per scope so a missing benefits scope never blocks events
 _cache = {"body": None, "expires": 0}
 
 
@@ -29,14 +33,15 @@ def _http(url, data=None, headers=None):
         return json.loads(r.read())
 
 
-def _access_token():
-    if _token["value"] and time.time() < _token["expires"]:
-        return _token["value"]
+def _access_token(scope):
+    tok = _tokens.get(scope)
+    if tok and time.time() < tok["expires"]:
+        return tok["value"]
     body = urllib.parse.urlencode({
         "client_id": os.environ["OFFICERND_CLIENT_ID"].strip(),  # pasted values often carry a newline
         "client_secret": os.environ["OFFICERND_CLIENT_SECRET"].strip(),
         "grant_type": "client_credentials",
-        "scope": SCOPE,
+        "scope": scope,
     }).encode()
     for url in TOKEN_URLS:
         try:
@@ -46,22 +51,37 @@ def _access_token():
             detail = e.read(300).decode(errors="replace") if isinstance(e, urllib.error.HTTPError) else ""
             logging.warning("token request to %s failed: %s %s", url, e, detail)
             continue
-        _token.update(value=tok["access_token"], expires=time.time() + int(tok.get("expires_in", 3600)) - 120)
-        return _token["value"]
+        _tokens[scope] = {"value": tok["access_token"], "expires": time.time() + int(tok.get("expires_in", 3600)) - 120}
+        return tok["access_token"]
     raise RuntimeError("could not obtain an OfficeRnD access token")
 
 
-def fetch_events():
-    """All events starting from now. Public API v2: bracket operators, pages of at most 50."""
-    auth = {"Authorization": f"Bearer {_access_token()}"}
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")  # computed per call, never fixed
-    params, out = {"start[$gte]": now, "$limit": 50}, []
+def _fetch_all(resource, scope, params=None):
+    """Every page of a public API v2 list (bracket operators, pages of at most 50)."""
+    auth = {"Authorization": f"Bearer {_access_token(scope)}"}
+    params, out = {**(params or {}), "$limit": 50}, []
     while True:
-        page = _http(f"{API}?{urllib.parse.urlencode(params)}", headers=auth)
+        page = _http(f"{BASE}/{resource}?{urllib.parse.urlencode(params)}", headers=auth)
         out += page.get("results", [])
         if not page.get("cursorNext"):
             return out
         params["$cursorNext"] = page["cursorNext"]
+
+
+def fetch_events():
+    """All events starting from now."""
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")  # computed per call, never fixed
+    return _fetch_all("events", EVENTS_SCOPE, {"start[$gte]": now})
+
+
+def fetch_benefits():
+    """Member perks, or None if they couldn't be fetched (e.g. the scope isn't granted yet).
+    None tells the page to keep the perks it already has; it never costs the events."""
+    try:
+        return shape_benefits(_fetch_all("benefits", BENEFITS_SCOPE))
+    except Exception:
+        logging.exception("fetching benefits failed; serving events without perks")
+        return None
 
 
 # --- blurbs -----------------------------------------------------------------
@@ -166,7 +186,8 @@ def events(request):
     if _cache["body"] and time.time() < _cache["expires"]:
         return (_cache["body"], 200, headers)
     try:
-        body = json.dumps({"generated": datetime.now(timezone.utc).isoformat(), "events": shape(fetch_events())})
+        body = json.dumps({"generated": datetime.now(timezone.utc).isoformat(),
+                           "events": shape(fetch_events()), "benefits": fetch_benefits()})
     except Exception:
         logging.exception("refreshing events failed")
         if _cache["body"]:  # stale beats blank on a lobby screen

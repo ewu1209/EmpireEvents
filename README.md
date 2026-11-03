@@ -22,6 +22,14 @@ No event data and no credentials are stored in this repo.
 
 The blurb is the opening of the event's OfficeRnD description, trimmed to about 190 characters. Lines that mention a promo code are always included, first and word for word. Disclaimers, waivers, date lines, emails, phone numbers and URLs are skipped. To change what a slide says, edit the event description in OfficeRnD.
 
+## Member perks
+
+The benefits members see in the Empire app are shown as full-width **Member perks** pages, up to four big cards to a page, split as evenly as possible (18 benefits → 4, 4, 4, 3, 3) and spread evenly between the event slides. Each card shows the benefit's image, category, name and a short offer line (at most ~100 characters) taken from its description (`function/benefits.py`: deal lines such as "% off", "free", "save" or "code" come first; phone numbers, emails, URLs and "click here" lines are skipped). The page samples each image's edges: logos that come in their own box get a matching ground (white boxes become ivory), and photos are shown whole over a blurred copy. To change a tile, edit the benefit in OfficeRnD.
+
+This needs the scope `flex.collaboration.benefits.read` on the **EmpireEvents TV** API app as well. Without it the function still serves events and returns `"benefits": null`, and the page keeps whatever perks it already had.
+
+Local preview before that's set up: save a raw benefits list (e.g. from `/i/organizations/empire/benefits` in a logged-in OfficeRnD tab) as `scripts/benefits.local.json`, which is gitignored, and `scripts/dev.py` adds it to the live events.
+
 ## Deploying the function
 
 **Live setup:** Google Cloud project `empire-events-2610`, region `us-west1`, function `empire-events`, running as the service account `empire-events-fn@empire-events-2610.iam.gserviceaccount.com`. That account can do only one thing: read the two OfficeRnD secrets. The OfficeRnD API app is **EmpireEvents TV** (Settings → Data & Extensibility → Developer Tools), which has the single scope `flex.collaboration.events.read`. Tokens come from `https://identity.officernd.com/oauth/token`.
