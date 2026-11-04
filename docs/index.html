@@ -25,51 +25,59 @@
    Layout for a 16:9 lobby TV: flyer panel left, details right, RSVP card bottom-aligned with the flyer.
    --u is 1% of the screen height (capped by width), so everything scales from 720p to 4K. */
 :root{
-  --bg:#131313; --panel:#1c1c1c; --line:#2c2c2c;
-  --gold:#f2b000; --white:#fff; --ivory:#ebe5d9; --mute:rgba(255,255,255,.68); --faint:rgba(255,255,255,.45);
+  /* Matched to the bar menu: warm black, the same gold, ivory type, hairline gold rules. */
+  --bg:#0c0b09; --panel:#16130e; --gold-rgb:242,176,0; --line:rgba(242,176,0,.16); --hair:rgba(242,176,0,.2);
+  --gold:#f2b000; --white:#f3ecdf; --ivory:#ebe5d9; --mute:rgba(243,236,223,.66); --faint:rgba(243,236,223,.44);
   --display:"Lemon Milk","Forum",Georgia,serif;
   --body:"Linotype Spitz","Inter Tight","Helvetica Neue",Arial,sans-serif;
   --u:min(1vh,.5625vw);
-  --radius:calc(var(--u)*1.2);
+  --radius:0px;
   --slide-ms:15000;
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--white);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
-.screen{height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:calc(var(--u)*3);
-  padding:calc(var(--u)*3.6) max(16px,calc(var(--u)*5.2));cursor:none}
+/* A soft gold glow at the top and a dark vignette, as on the menu. */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 55% 38% at 50% 0%,rgba(var(--gold-rgb),.085),transparent 72%),
+  radial-gradient(ellipse 120% 95% at 50% 50%,transparent 58%,rgba(0,0,0,.6))}
+/* The frame: the menu's rules, corners and pearls, broken at the bottom for the logo. Drawn by frame(). */
+.frame{position:fixed;inset:0;pointer-events:none}
+.frame svg{width:100%;height:100%;fill:none;stroke:var(--gold);stroke-linecap:round}
+.frame .outer{opacity:.3}.frame .inner{opacity:.42}.frame .orn{opacity:.62}.frame .fillet{opacity:.16}
+.frame .bead{fill:var(--gold);stroke:none}.frame .pearl{fill:var(--gold);stroke:none;opacity:.32}
+.screen{position:relative;height:100%;display:grid;grid-template-rows:1fr auto;gap:calc(var(--u)*3.6);
+  padding:calc(var(--u)*10.5) calc(var(--u)*12) calc(var(--u)*3.6);cursor:none}
 .screen.awake{cursor:default}
 
-header{display:flex;justify-content:space-between;align-items:center;gap:16px}
-.logo{height:calc(var(--u)*5.4);width:auto;display:block}
-.meta{display:flex;align-items:center;gap:calc(var(--u)*2.4);font-size:calc(var(--u)*2.1);color:var(--mute);font-variant-numeric:tabular-nums}
 
 /* Featured event on the left, the agenda of everything coming up on the right. */
-.main{display:grid;grid-template-columns:minmax(0,1fr) calc(var(--u)*46);gap:calc(var(--u)*4.5);min-height:0}
+.main{display:grid;grid-template-columns:minmax(0,1fr) calc(var(--u)*44);gap:calc(var(--u)*5.5);min-height:0}
 .stage{position:relative;min-height:0}
-.slide{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:calc(var(--u)*4.5);
+.slide{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:calc(var(--u)*5.5);
   opacity:0;transition:opacity .8s ease;pointer-events:none}
 .slide.on{opacity:1;pointer-events:auto}
 
 /* Flyer panel: the flyer whole and as large as fits, over a blurred, darkened copy of itself. */
-.art{position:relative;border-radius:var(--radius);overflow:hidden;background:var(--panel);display:grid;place-items:center;min-height:0}
+.art{position:relative;border-radius:var(--radius);overflow:hidden;background:var(--panel);display:grid;place-items:center;min-height:0;
+  border:1px solid rgba(var(--gold-rgb),.42);box-shadow:inset 0 0 0 calc(var(--u)*.9) var(--bg),inset 0 0 0 calc(var(--u)*.9 + 1px) rgba(var(--gold-rgb),.18)}
 .art .wash{position:absolute;inset:-12%;background:center/cover no-repeat;filter:blur(calc(var(--u)*5)) brightness(.42) saturate(1.15);transform:scale(1.04)}
 /* Sized by sizeArt() to the largest box that fits, so small source images scale up too. */
 .art img{position:relative;display:block;max-width:none;border-radius:calc(var(--radius)*.6);box-shadow:0 calc(var(--u)*2) calc(var(--u)*6) rgba(0,0,0,.55)}
 .slide.on .art .wash{animation:drift calc(var(--slide-ms)*1ms) linear forwards}
 @keyframes drift{to{transform:scale(1.12)}}
 /* No flyer: a big date card instead. */
-.art.datecard{background:linear-gradient(160deg,#1f1f1f,#141414);align-content:center;justify-items:center;gap:calc(var(--u)*1)}
-.datecard .dnum{font-family:var(--display);font-size:calc(var(--u)*30);line-height:.85;color:var(--gold)}
-.datecard .dmon{font-weight:600;letter-spacing:.3em;text-transform:uppercase;font-size:calc(var(--u)*2.8)}
+.art.datecard{background:linear-gradient(160deg,#1b1711,#100e0b);align-content:center;justify-items:center;gap:calc(var(--u)*1)}
+.datecard .dnum{font-family:var(--display);font-weight:300;font-size:calc(var(--u)*30);line-height:.85;color:var(--gold)}
+.datecard .dmon{font-family:var(--display);font-weight:400;letter-spacing:.34em;text-transform:uppercase;font-size:calc(var(--u)*2.8)}
 
 .info{display:flex;flex-direction:column;min-height:0;min-width:0;padding-block:calc(var(--u)*1)}
 .top{display:flex;flex-direction:column;gap:calc(var(--u)*2.2);min-height:0;overflow:hidden}
 .top>*{flex-shrink:0} /* overflow must show up on .top, where fit() measures it, not squash the items */
-.date{color:var(--gold);font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:calc(var(--u)*2.8)}
-.time{font-weight:500;font-size:calc(var(--u)*3.6);margin-top:calc(var(--u)*-1);font-variant-numeric:tabular-nums}
-h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(var(--u)*.2);line-height:1.04;text-wrap:balance;font-size:calc(var(--u)*7)}
+.date{color:var(--gold);font-family:var(--display);font-weight:400;letter-spacing:.3em;text-transform:uppercase;font-size:calc(var(--u)*2.5)}
+.time{font-family:var(--display);font-weight:300;letter-spacing:.18em;font-size:calc(var(--u)*2.9);margin-top:calc(var(--u)*-.6);font-variant-numeric:tabular-nums}
+h1{font-family:var(--display);font-weight:300;letter-spacing:.05em;margin:calc(var(--u)*.8) 0 calc(var(--u)*.2);line-height:1.04;text-wrap:balance;font-size:calc(var(--u)*7)}
 .where{display:flex;align-items:center;gap:.5em;font-size:calc(var(--u)*3);font-weight:500}
 .where svg{width:.95em;height:.95em;flex:none;fill:var(--gold)}
 .blurb{margin:0;color:var(--mute);font-size:calc(var(--u)*2.7);line-height:1.45;max-width:34em;
@@ -77,21 +85,22 @@ h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(va
 
 /* RSVP card sits on the flyer's bottom edge. */
 .rsvp{margin-top:auto;padding-top:calc(var(--u)*3);display:flex;align-items:center;gap:calc(var(--u)*3)}
-.qr{flex:none;width:calc(var(--u)*20);aspect-ratio:1;background:var(--white);border-radius:var(--radius);padding:calc(var(--u)*1.5)}
-.qr svg{display:block;width:100%;height:100%;fill:#131313}
-.rsvp .cta{font-family:var(--display);font-size:calc(var(--u)*3.4);line-height:1.05}
+.qr{flex:none;width:calc(var(--u)*20);aspect-ratio:1;background:var(--white);border-radius:var(--radius);padding:calc(var(--u)*1.5);
+  outline:1px solid rgba(var(--gold-rgb),.42);outline-offset:calc(var(--u)*.9)}
+.qr svg{display:block;width:100%;height:100%;fill:var(--bg)}
+.rsvp .cta{font-family:var(--display);font-weight:400;letter-spacing:.2em;color:var(--gold);font-size:calc(var(--u)*2.7);line-height:1.15;white-space:nowrap}
 .rsvp .url{color:var(--faint);font-size:calc(var(--u)*2.3);margin-top:calc(var(--u)*1);overflow-wrap:anywhere}
-.rsvp .pill{display:inline-block;margin-bottom:calc(var(--u)*1.4);background:var(--gold);color:#131313;font-weight:600;font-size:calc(var(--u)*2);
-  letter-spacing:.14em;text-transform:uppercase;padding:.55em 1em;border-radius:calc(var(--u)*.8)}
-.rsvp.walkin .cta{color:var(--white)}
+.rsvp .pill{display:inline-block;margin-bottom:calc(var(--u)*1.6);border:1px solid rgba(var(--gold-rgb),.5);color:var(--gold);
+  font-family:var(--display);font-weight:400;font-size:calc(var(--u)*1.8);letter-spacing:.26em;text-transform:uppercase;padding:.7em 1.1em .6em}
+.rsvp.walkin .cta{color:var(--white);font-weight:300}
 .rsvp.walkin .url{color:var(--mute)}
 
 /* Agenda: every upcoming event, the featured one highlighted; the list glides up a row per slide
    and wraps (it is rendered twice so the loop is seamless). The fade at the bottom says "more below". */
 .agenda{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--line);padding-left:calc(var(--u)*4)}
 .ag-head{display:grid;gap:calc(var(--u)*1.1);padding-bottom:calc(var(--u)*2);border-bottom:1px solid var(--line)}
-.ag-head h2{margin:0;font-family:var(--display);font-weight:400;font-size:calc(var(--u)*3.3);line-height:1;white-space:nowrap}
-.ag-count{color:var(--gold);font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:calc(var(--u)*1.75);white-space:nowrap}
+.ag-head h2{margin:0;font-family:var(--display);font-weight:400;font-size:calc(var(--u)*2.7);line-height:1;letter-spacing:.3em;color:var(--gold);white-space:nowrap}
+.ag-count{color:var(--mute);font-size:calc(var(--u)*2.1);letter-spacing:.03em;white-space:nowrap}
 .ag-window{position:relative;flex:1;min-height:0;overflow:hidden;margin-top:calc(var(--u)*1.6);
   -webkit-mask-image:linear-gradient(transparent,#000 16%,#000 76%,transparent);mask-image:linear-gradient(transparent,#000 16%,#000 76%,transparent)}
 .ag-list{list-style:none;margin:0;padding:0;transition:transform .9s cubic-bezier(.4,0,.2,1)}
@@ -99,20 +108,20 @@ h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(va
 .ag-item{display:grid;grid-template-columns:calc(var(--u)*7.5) minmax(0,1fr);align-items:center;gap:calc(var(--u)*2.2);
   padding:calc(var(--u)*1.5) calc(var(--u)*1.8);margin-bottom:calc(var(--u)*.8);border-radius:var(--radius);
   border-left:calc(var(--u)*.45) solid transparent;transition:background .6s,border-color .6s}
-.ag-item.on{background:var(--panel);border-left-color:var(--gold)}
+.ag-item.on{background:linear-gradient(90deg,rgba(var(--gold-rgb),.09),rgba(var(--gold-rgb),.02));border-left-color:var(--gold)}
 .ag-date{display:grid;justify-items:center;line-height:1;font-variant-numeric:tabular-nums}
-.ag-date .dw{color:var(--gold);font-weight:600;letter-spacing:.14em;font-size:calc(var(--u)*1.55)}
-.ag-date .dn{font-family:var(--display);font-size:calc(var(--u)*4);margin:calc(var(--u)*.35) 0 calc(var(--u)*.25)}
-.ag-date .dm{color:var(--mute);font-weight:600;letter-spacing:.14em;font-size:calc(var(--u)*1.45)}
+.ag-date .dw{color:var(--gold);font-family:var(--display);font-weight:400;letter-spacing:.22em;font-size:calc(var(--u)*1.45)}
+.ag-date .dn{font-family:var(--display);font-weight:300;font-size:calc(var(--u)*4);margin:calc(var(--u)*.35) 0 calc(var(--u)*.25)}
+.ag-date .dm{color:var(--mute);font-family:var(--display);font-weight:300;letter-spacing:.22em;font-size:calc(var(--u)*1.35)}
 /* Every row is as tall as a two-line title (text centred inside), so the rhythm is even and scroll offsets never shift. */
 .ag-item{min-height:calc(var(--u)*11)}
-.ag-title{font-family:var(--display);font-size:calc(var(--u)*2.2);line-height:1.18;letter-spacing:.01em;color:rgba(255,255,255,.88);
+.ag-title{font-family:var(--display);font-weight:300;font-size:calc(var(--u)*2.2);line-height:1.2;letter-spacing:.04em;color:rgba(243,236,223,.9);
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-.ag-item.on .ag-title{color:var(--white)}
+.ag-item.on .ag-title{color:var(--gold)}
 .ag-sub{color:var(--faint);font-size:calc(var(--u)*1.85);margin-top:calc(var(--u)*.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Where the loop starts over, so Dec 31 → Oct 31 doesn't read as a date mistake. */
 .ag-loop{display:flex;align-items:center;gap:calc(var(--u)*1.4);margin:calc(var(--u)*1.4) 0 calc(var(--u)*2.2);color:var(--gold);
-  font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:calc(var(--u)*1.45)}
+  font-family:var(--display);font-weight:400;letter-spacing:.26em;text-transform:uppercase;font-size:calc(var(--u)*1.45)}
 .ag-loop::before,.ag-loop::after{content:"";flex:1;height:1px;background:var(--line)}
 
 /* Member perks: a page of OfficeRnD benefits (up to four) between event slides. It lives in .wide, a layer
@@ -122,17 +131,18 @@ h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(va
 .wide .slide{background:var(--bg)}
 .slide.perks{display:flex;flex-direction:column;gap:calc(var(--u)*3)}
 .pk-head{display:flex;align-items:flex-end;justify-content:space-between;gap:calc(var(--u)*3)}
-.pk-head h1{margin:0;font-size:calc(var(--u)*5.6);line-height:1}
+.pk-head h1{margin:0;font-size:calc(var(--u)*5.6);line-height:1;color:var(--gold)}
 .pk-note{color:var(--mute);font-size:calc(var(--u)*2.6);text-align:right}
 .pk-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--cols,4),minmax(0,1fr));gap:calc(var(--u)*2.6);
   justify-content:center}
-.pk{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0;background:var(--panel);border-radius:var(--radius);overflow:hidden}
+.pk{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0;background:var(--panel);border-radius:var(--radius);overflow:hidden;
+  border:1px solid rgba(var(--gold-rgb),.24)}
 /* Image panel. Until the image is sorted (see look()), only the empty panel shows. Then:
    .is-photo - shown whole over a blurred, darkened copy of itself;
    .is-logo  - on a solid ground matching the logo's own edge colour (set inline), so a logo that comes
              in its own box fills the panel instead of floating like a sticker;
    .is-blend - a white-boxed logo: ivory ground, multiplied, so its white box becomes the ivory. */
-.pk-img{position:relative;min-height:0;background:#202020;overflow:hidden;transition:background-color .4s}
+.pk-img{position:relative;min-height:0;background:#1c1914;overflow:hidden;transition:background-color .4s}
 .pk-img img,.pk-img .wash{opacity:0;transition:opacity .4s}
 .pk-img.is-photo img,.pk-img.is-photo .wash,.pk-img.is-logo img{opacity:1}
 .pk-img .wash{position:absolute;inset:-15%;background:center/cover no-repeat;filter:blur(calc(var(--u)*3)) brightness(.45) saturate(1.1)}
@@ -145,17 +155,24 @@ h1{font-family:var(--display);font-weight:400;margin:calc(var(--u)*.8) 0 calc(va
 .pk-img.mono{display:grid;place-items:center;font-family:var(--display);color:var(--gold);font-size:calc(var(--u)*9)}
 .pk-body{padding:calc(var(--u)*2.4) calc(var(--u)*2.6) calc(var(--u)*2.8);display:grid;gap:calc(var(--u)*1);align-content:start;
   height:calc(var(--u)*30);overflow:hidden} /* fixed, so every image panel on a page is the same size */
-.pk-cat{color:var(--gold);font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:calc(var(--u)*1.8);
+.pk-cat{color:var(--gold);font-family:var(--display);font-weight:400;letter-spacing:.24em;text-transform:uppercase;font-size:calc(var(--u)*1.8);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pk-name{font-family:var(--display);font-size:calc(var(--u)*3.1);line-height:1.1;text-wrap:pretty;
+.pk-name{font-family:var(--display);font-weight:300;letter-spacing:.03em;font-size:calc(var(--u)*3.1);line-height:1.1;text-wrap:pretty;
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-.pk-offer{margin:0;color:rgba(255,255,255,.86);font-size:calc(var(--u)*2.55);line-height:1.36;
+.pk-offer{margin:0;color:rgba(243,236,223,.86);font-size:calc(var(--u)*2.55);line-height:1.36;
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
 
-footer{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:calc(var(--u)*2.6);color:var(--faint);
-  font-size:calc(var(--u)*1.9);font-variant-numeric:tabular-nums}
-.rail{height:calc(var(--u)*.35);min-height:2px;background:var(--line);position:relative;overflow:hidden;border-radius:9px}
-.rail i{position:absolute;inset:0;background:var(--gold);transform-origin:left;transform:scaleX(0)}
+/* Sign-off strip as on the menu: the logo centred over the frame's break, slide count and progress on
+   the left, the clock on the right. */
+footer{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:calc(var(--u)*3.5);
+  font-family:var(--display);font-weight:300;font-size:calc(var(--u)*1.6);letter-spacing:.28em;text-transform:uppercase;color:var(--mute);
+  font-variant-numeric:tabular-nums}
+footer .side{display:flex;align-items:center;gap:calc(var(--u)*3);min-width:0}
+footer .side>span{flex:none;white-space:nowrap}
+.logo{height:calc(var(--u)*11.5);width:auto;display:block}
+.rule{flex:1;height:1px;background:linear-gradient(270deg,rgba(var(--gold-rgb),.08),var(--hair))}
+.rail{flex:1;height:1px;background:linear-gradient(90deg,rgba(var(--gold-rgb),.08),var(--hair));position:relative;overflow:hidden}
+.rail i{position:absolute;inset:0;background:linear-gradient(90deg,rgba(var(--gold-rgb),.25),var(--gold));transform-origin:left;transform:scaleX(0)}
 .rail i.run{animation:fill linear forwards;animation-duration:calc(var(--slide-ms) * 1ms)}
 @keyframes fill{to{transform:scaleX(1)}}
 
@@ -166,6 +183,8 @@ footer{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:calc(v
 /* Phones and narrow windows: stack and scroll. */
 @media (max-width:760px){
   :root{--u:1.6vw}
+  .frame{display:none}
+  footer{grid-template-columns:1fr}footer .side:last-child{display:none}.logo{height:72px;margin:0 auto}
   body{overflow:auto}
   .screen{height:auto;min-height:100%;padding:20px 16px}
   .main{grid-template-columns:1fr;gap:28px}
@@ -191,11 +210,8 @@ footer{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:calc(v
 @media (prefers-reduced-motion:reduce){.slide{transition:none}.slide.on .art .wash,.rail i.run{animation:none}}
 </style>
 
+<div class="frame" id="frame" aria-hidden="true"></div>
 <div class="screen" id="screen">
-  <header>
-    <img class="logo" src="assets/empire-logo.png" alt="Empire Scottsdale">
-    <div class="meta"><span id="clock"></span></div>
-  </header>
   <div class="main">
     <main class="stage" id="stage" aria-live="polite"></main>
     <aside class="agenda" aria-label="Upcoming events">
@@ -205,12 +221,67 @@ footer{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:calc(v
     <div class="wide" id="wide" aria-live="polite"></div>
   </div>
   <footer>
-    <span id="count">–</span>
-    <div class="rail"><i id="rail"></i></div>
+    <div class="side"><span id="count">–</span><div class="rail"><i id="rail"></i></div></div>
+    <img class="logo" id="logo" src="assets/empire-logo-full.png" alt="Empire Scottsdale">
+    <div class="side"><div class="rule"></div><span id="clock"></span></div>
   </footer>
 </div>
 
 <script>
+const fan = (cx, cy, dir, len, spread, n) => {
+  const pt = (deg, r) => [cx + r * Math.cos(deg * Math.PI / 180), cy + r * Math.sin(deg * Math.PI / 180)];
+  const angs = [...Array(n)].map((_, k) => dir - spread + 2 * spread * k / (n - 1));
+  const rays = angs.map(t => { const [x, y] = pt(t, len * .25), [X, Y] = pt(t, len); return `M${x} ${y}L${X} ${Y}`; }).join("");
+  const edge = angs.slice(1).map((t, k) => { const [qx, qy] = pt((t + angs[k]) / 2, len * 1.22), [X, Y] = pt(t, len); return `Q${qx} ${qy} ${X} ${Y}`; }).join("");
+  const [sx, sy] = pt(angs[0], len);
+  return `<path d="${rays}M${sx} ${sy}${edge}"/><circle class="bead" cx="${cx}" cy="${cy}" r="${len * .12}"/>`;
+};
+const LEAF = `<path d="M0 0C.35-.3.85-.25 1 0C.85.25.35.3 0 0Z"/>`;
+const CORNER = `
+  <path d="M5.6 .9C7.6 .9 9.4 .8 10.7 1.6C11.6 2.2 11.3 3.3 10.4 3.2C9.7 3.1 9.7 2.3 10.2 2.2"/>
+  <path d="M.9 5.6C.9 7.6 .8 9.4 1.6 10.7C2.2 11.6 3.3 11.3 3.2 10.4C3.1 9.7 2.3 9.7 2.2 10.2"/>
+  <path d="M10.7 1.6C9.6 2.6 8.4 3 7.1 2.8"/><path d="M1.6 10.7C2.6 9.6 3 8.4 2.8 7.1"/>
+  <path d="M11.9 1.1C12.9 .45 14.3 .5 15.5 .95C14.3 1.45 12.9 1.6 11.9 1.1Z"/><path d="M12.4 1.08L15 .97"/>
+  <path d="M1.1 11.9C.45 12.9 .5 14.3 .95 15.5C1.45 14.3 1.6 12.9 1.1 11.9Z"/><path d="M1.08 12.4L.97 15"/>
+  <path d="M15.5 .95C16.8 .9 17.6 1.5 17.4 2.2C17.2 2.8 16.4 2.7 16.5 2.1"/><path d="M.95 15.5C.9 16.8 1.5 17.6 2.2 17.4C2.8 17.2 2.7 16.4 2.1 16.5"/>
+  <circle class="bead" cx="19" cy="1" r=".26"/><circle class="bead" cx="20.2" cy="1" r=".19"/><circle class="bead" cx="21.2" cy="1" r=".13"/>
+  <circle class="bead" cx="1" cy="19" r=".26"/><circle class="bead" cx="1" cy="20.2" r=".19"/><circle class="bead" cx="1" cy="21.2" r=".13"/>
+  ${fan(2.3, 2.3, 45, 1.75, 62, 5)}
+  <g transform="translate(.3 .3) rotate(45)">${[0, 90, 180, 270].map(r => `<g transform="rotate(${r})">${LEAF}</g>`).join("")}</g>
+  <circle class="bead" cx=".3" cy=".3" r=".22"/>`;
+const BRACKET = `<path d="M0 0C-1.3 0-2.4-.4-2.7-1.4C-2.9-2.2-2.1-2.7-1.6-2.2C-1.2-1.8-1.5-1.3-1.9-1.4"/>
+  <path d="M.6-.1C1.4-.6 2.6-.6 3.6-.1"/><circle class="bead" cx="0" cy="0" r=".3"/>`;
+// The menu's frame, lighter: outer rule, inner rule with concave corners, a faint fillet, pearls and corner
+// ornaments, with a break in the bottom rules where the logo sits, closed by scroll brackets.
+function frame() {
+  const W = innerWidth, H = innerHeight, u = Math.min(H / 100, W * .5625 / 100);
+  const a = 1.7 * u, b = 2.8 * u, R = 3.6 * u, f = .9 * u, sw = Math.max(1, u * .11), C = 1.1;
+  const gb = (document.getElementById("logo").offsetWidth || 15 * u) / 2 + 5 * u;
+  const rule = (i, r) => {
+    const o = Math.sqrt(r * r - (i - b) ** 2), arc = (x, y) => `A${r} ${r} 0 0 0 ${x} ${y}`;
+    return `M${b + o} ${i}H${W - b - o}${arc(W - i, b + o)}V${H - b - o}${arc(W - b - o, H - i)}H${W / 2 + gb}
+      M${W / 2 - gb} ${H - i}H${b + o}${arc(i, H - b - o)}V${b + o}${arc(b + o, i)}`;
+  };
+  const at = (x, y, sx, sy, art) => `<g transform="translate(${x} ${y}) scale(${u * sx} ${u * sy})">${art}</g>`;
+  const m = (a + b) / 2, pearls = [];
+  for (let x = m + 8 * u; x < W - m - 8 * u; x += 1.5 * u) {
+    pearls.push([x, m]);
+    if (Math.abs(x - W / 2) > gb + 1.5 * u) pearls.push([x, H - m]);
+  }
+  for (let y = m + 8 * u; y < H - m - 8 * u; y += 1.5 * u) pearls.push([m, y], [W - m, y]);
+  const box = document.getElementById("frame");
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" stroke-width="${sw}">
+    <path class="outer" d="M${W / 2 - gb} ${H - a}H${a}V${a}H${W - a}V${H - a}H${W / 2 + gb}"/>
+    <path class="inner" d="${rule(b, R)}"/><path class="fillet" d="${rule(b + f, R + f)}"/>
+    <g class="pearl">${pearls.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="${.13 * u}"/>`).join("")}</g>
+    <g class="orn">${at(b, b, C, C, CORNER)}${at(W - b, b, -C, C, CORNER)}${at(b, H - b, C, -C, CORNER)}${at(W - b, H - b, -C, -C, CORNER)}
+      ${at(W / 2 - gb, H - m, -1.2, 1.2, BRACKET)}${at(W / 2 + gb, H - m, 1.2, 1.2, BRACKET)}</g></svg>`;
+  box.querySelectorAll(".orn *").forEach((el) => el.setAttribute("vector-effect", "non-scaling-stroke"));
+}
+frame();
+document.getElementById("logo").addEventListener("load", frame);
+addEventListener("resize", frame);
+
 // Events come live from the Cloud Run function (URL in config.js); the last good list is kept for power cuts and outages.
 const API = window.EMPIRE_EVENTS_API;
 const REFRESH_MS = 5 * 60e3, CACHE_KEY = "empire-events", PERKS_KEY = "empire-perks";
