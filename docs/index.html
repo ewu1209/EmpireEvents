@@ -125,10 +125,12 @@ h1{font-family:var(--display);font-weight:300;letter-spacing:.05em;margin:calc(v
 .ag-loop::before,.ag-loop::after{content:"";flex:1;height:1px;background:var(--line)}
 
 /* Member perks: a page of OfficeRnD benefits (up to four) between event slides. It lives in .wide, a layer
-   over the whole main area, and has an opaque ground, so it fades in over the event slide and the agenda alike. */
+   over the whole main area, so it can use the full width while the event slide and agenda fade out. */
 .main{position:relative}
 .wide{position:absolute;inset:0;pointer-events:none}
-.wide .slide{background:var(--bg)}
+/* No ground of its own (that would cut off the frame's glow): the event slide and agenda fade out beneath it. */
+.main>.stage,.main>.agenda{transition:opacity .8s ease}
+.main.perks-on>.stage,.main.perks-on>.agenda{opacity:0}
 .slide.perks{display:flex;flex-direction:column;gap:calc(var(--u)*3)}
 .pk-head{display:flex;align-items:flex-end;justify-content:space-between;gap:calc(var(--u)*3)}
 .pk-head h1{margin:0;font-size:calc(var(--u)*5.6);line-height:1;color:var(--gold)}
@@ -201,7 +203,7 @@ footer .side>span{flex:none;white-space:nowrap}
   h1{font-size:34px}
   .date{font-size:13px}.time{font-size:17px}.where{font-size:16px}.blurb{font-size:15px}
   .qr{width:120px}.rsvp .cta{font-size:24px}.rsvp .url{font-size:13px}
-  .wide{position:static}.wide:empty{display:none}
+  .wide{position:static}.wide:empty{display:none}.main.perks-on>.agenda{opacity:1}
   .slide.perks{display:none}.slide.perks.on{display:flex}
   .pk-head{flex-direction:column;align-items:flex-start}.pk-note{text-align:left;font-size:14px}
   .pk-grid{grid-template-columns:1fr 1fr!important}.pk-img{aspect-ratio:1}
@@ -568,7 +570,7 @@ function show(step = 1) {
   const list = upcoming(), pages = perkPages(), d = deck(list, pages);
   clearTimeout(timer);
   if (!d.length) {
-    wide.innerHTML = "";
+    wide.innerHTML = ""; wide.parentElement.classList.remove("perks-on");
     stage.innerHTML = loaded
       ? `<div class="empty"><h1>No upcoming events</h1><p>Check back soon.</p></div>`
       : `<div class="empty"><h1>Loading events…</h1></div>`;
@@ -581,6 +583,7 @@ function show(step = 1) {
   i = (i + step + d.length) % d.length;
   const item = d[i], isPerks = item.p !== undefined;
   const host = isPerks ? wide : stage;
+  wide.parentElement.classList.toggle("perks-on", isPerks);
   host.insertAdjacentHTML("beforeend", isPerks ? perksHTML(pages[item.p]) : slideHTML(list[item.k]));
   const el = host.lastElementChild;
   if (isPerks) { dressImages(el); fitPerks(el); }
